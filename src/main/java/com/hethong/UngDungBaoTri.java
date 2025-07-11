@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -33,7 +34,7 @@ public class UngDungBaoTri {
         SpringApplication.run(UngDungBaoTri.class, args);
         System.out.println("=== HỆ THỐNG QUẢN LÝ BẢO TRÌ THIẾT BỊ ===");
         System.out.println("Ứng dụng đã khởi động thành công!");
-        System.out.println("Truy cập: http://localhost:8080");
+        System.out.println("Truy cập: http://localhost:8081");
         System.out.println("========================================");
     }
 
@@ -50,7 +51,7 @@ public class UngDungBaoTri {
         mapper.getConfiguration()
                 .setFieldMatchingEnabled(true)
                 .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE)
-                .setMatchingStrategy(org.modelmapper.MatchingStrategies.STRICT);
+                .setMatchingStrategy(MatchingStrategies.STRICT);
 
         return mapper;
     }

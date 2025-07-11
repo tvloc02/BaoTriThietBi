@@ -3,7 +3,6 @@ package com.hethong.baotri.dich_vu.nguoi_dung;
 import com.hethong.baotri.kho_du_lieu.nguoi_dung.NguoiDungRepository;
 import com.hethong.baotri.thuc_the.nguoi_dung.NguoiDung;
 import com.hethong.baotri.tien_ich.JwtTokenUtil;
-import com.hethong.baotri.tien_ich.ThongBaoEmail;
 import com.hethong.baotri.ngoai_le.NgoaiLeNguoiDung;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +35,6 @@ public class XacThucService {
     private final NguoiDungService nguoiDungService;
     private final JwtTokenUtil jwtTokenUtil;
     private final PasswordEncoder passwordEncoder;
-    private final ThongBaoEmail thongBaoEmail;
 
     public Map<String, Object> dangNhap(String tenDangNhap, String matKhau) {
         log.info("Đang xử lý đăng nhập cho: {}", tenDangNhap);
@@ -156,7 +155,7 @@ public class XacThucService {
                 resetLink
         );
 
-        thongBaoEmail.guiEmailThongBao(email, "Đặt lại mật khẩu", noiDung);
+        // thongBaoEmail.guiEmailThongBao(email, "Đặt lại mật khẩu", noiDung);
 
         log.info("Đã gửi email đặt lại mật khẩu cho: {}", email);
     }
@@ -203,19 +202,19 @@ public class XacThucService {
 
         // Gửi email thông báo đổi mật khẩu
         if (nguoiDung.getEmail() != null) {
-            thongBaoEmail.guiEmailThongBao(
-                    nguoiDung.getEmail(),
-                    "Thông báo đổi mật khẩu",
-                    String.format(
-                            "Kính gửi %s,\n\n" +
-                                    "Mật khẩu của bạn đã được đổi thành công vào lúc %s.\n\n" +
-                                    "Nếu bạn không thực hiện thao tác này, vui lòng liên hệ với quản trị viên.\n\n" +
-                                    "Trân trọng,\n" +
-                                    "Hệ thống quản lý bảo trì",
-                            nguoiDung.getHoVaTen(),
-                            LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))
-                    )
-            );
+            // thongBaoEmail.guiEmailThongBao(
+            //         nguoiDung.getEmail(),
+            //         "Thông báo đổi mật khẩu",
+            //         String.format(
+            //                 "Kính gửi %s,\n\n" +
+            //                         "Mật khẩu của bạn đã được đổi thành công vào lúc %s.\n\n" +
+            //                         "Nếu bạn không thực hiện thao tác này, vui lòng liên hệ với quản trị viên.\n\n" +
+            //                         "Trân trọng,\n" +
+            //                         "Hệ thống quản lý bảo trì",
+            //                 nguoiDung.getHoVaTen(),
+            //                 LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))
+            //         )
+            // );
         }
 
         log.info("Đổi mật khẩu thành công cho: {}", tenDangNhap);
@@ -249,19 +248,19 @@ public class XacThucService {
         nguoiDungRepository.save(nguoiDung);
 
         // Gửi email chào mừng
-        thongBaoEmail.guiEmailThongBao(
-                email,
-                "Chào mừng bạn đến với hệ thống",
-                String.format(
-                        "Kính gửi %s,\n\n" +
-                                "Tài khoản của bạn đã được kích hoạt thành công!\n\n" +
-                                "Bạn có thể đăng nhập vào hệ thống với tên đăng nhập: %s\n\n" +
-                                "Trân trọng,\n" +
-                                "Hệ thống quản lý bảo trì",
-                        nguoiDung.getHoVaTen(),
-                        nguoiDung.getTenDangNhap()
-                )
-        );
+        // thongBaoEmail.guiEmailThongBao(
+        //         email,
+        //         "Chào mừng bạn đến với hệ thống",
+        //         String.format(
+        //                 "Kính gửi %s,\n\n" +
+        //                         "Tài khoản của bạn đã được kích hoạt thành công!\n\n" +
+        //                         "Bạn có thể đăng nhập vào hệ thống với tên đăng nhập: %s\n\n" +
+        //                         "Trân trọng,\n" +
+        //                         "Hệ thống quản lý bảo trì",
+        //                 nguoiDung.getHoVaTen(),
+        //                 nguoiDung.getTenDangNhap()
+        //         )
+        // );
 
         log.info("Kích hoạt tài khoản thành công cho: {}", email);
     }
@@ -300,18 +299,18 @@ public class XacThucService {
 
             // Gửi email thông báo mở khóa
             if (nguoiDung.getEmail() != null) {
-                thongBaoEmail.guiEmailThongBao(
-                        nguoiDung.getEmail(),
-                        "Tài khoản đã được mở khóa",
-                        String.format(
-                                "Kính gửi %s,\n\n" +
-                                        "Tài khoản của bạn đã được mở khóa tự động.\n\n" +
-                                        "Bạn có thể đăng nhập lại vào hệ thống.\n\n" +
-                                        "Trân trọng,\n" +
-                                        "Hệ thống quản lý bảo trì",
-                                nguoiDung.getHoVaTen()
-                        )
-                );
+                // thongBaoEmail.guiEmailThongBao(
+                //         nguoiDung.getEmail(),
+                //         "Tài khoản đã được mở khóa",
+                //         String.format(
+                //                 "Kính gửi %s,\n\n" +
+                //                         "Tài khoản của bạn đã được mở khóa tự động.\n\n" +
+                //                         "Bạn có thể đăng nhập lại vào hệ thống.\n\n" +
+                //                         "Trân trọng,\n" +
+                //                         "Hệ thống quản lý bảo trì",
+                //                 nguoiDung.getHoVaTen()
+                //         )
+                // );
             }
 
             log.info("Đã mở khóa tài khoản: {}", nguoiDung.getTenDangNhap());

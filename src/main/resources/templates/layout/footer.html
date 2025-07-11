@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<footer th:fragment="footer" class="footer mt-5">
+    <style>
+        .footer {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(108, 92, 231, 0.1);
+            padding: 2rem 0 1rem;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            color: var(--gray-600);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-200);
+            color: var(--gray-500);
+            font-size: 0.9rem;
+        }
+
+        .footer-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-stat {
+            text-align: center;
+        }
+
+        .footer-stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+        }
+
+        .footer-stat-label {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .footer-links {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .footer-stats {
+                gap: 1.5rem;
+            }
+
+            .footer-content {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+
+    <div class="footer-content">
+        <!-- System Stats -->
+        <div class="footer-stats">
+            <div class="footer-stat">
+                <span class="footer-stat-number" th:text="${totalEquipment ?: '40,689'}">40,689</span>
+                <span class="footer-stat-label">Thiết bị</span>
+            </div>
+            <div class="footer-stat">
+                <span class="footer-stat-number" th:text="${totalOrders ?: '10,293'}">10,293</span>
+                <span class="footer-stat-label">Lệnh bảo trì</span>
+            </div>
+            <div class="footer-stat">
+                <span class="footer-stat-number" th:text="${totalRevenue ?: '$89,000'}">$89,000</span>
+                <span class="footer-stat-label">Chi phí tiết kiệm</span>
+            </div>
+            <div class="footer-stat">
+                <span class="footer-stat-number" th:text="${totalPending ?: '2,040'}">2,040</span>
+                <span class="footer-stat-label">Đang xử lý</span>
+            </div>
+        </div>
+
+        <!-- Footer Links -->
+        <div class="footer-links">
+            <a href="/huong-dan">Hướng dẫn sử dụng</a>
+            <a href="/ho-tro">Hỗ trợ kỹ thuật</a>
+            <a href="/bao-mat">Chính sách bảo mật</a>
+            <a href="/lien-he">Liên hệ</a>
+            <a href="/api-docs">API Documentation</a>
+        </div>
+
+        <!-- Copyright -->
+        <div class="footer-bottom">
+            <p>&copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2024</span> DashStack - Hệ thống quản lý bảo trì thiết bị.
+                Phiên bản <span th:text="${appVersion ?: '1.0.0'}">1.0.0</span></p>
+            <p>Được phát triển với <i class="bi bi-heart-fill text-danger"></i> cho ngành công nghiệp Việt Nam</p>
+        </div>
+    </div>
+</footer>
+
+</html>

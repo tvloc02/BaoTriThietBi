@@ -18,6 +18,7 @@ import java.util.function.Function;
 public class JwtTokenUtil {
 
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60; // 5 hours
+    public static final long JWT_REFRESH_TOKEN_VALIDITY = 7 * 24 * 60 * 60; // 7 days
 
     @Value("${jwt.secret:hethongbaotri}")
     private String secret;
@@ -54,15 +55,21 @@ public class JwtTokenUtil {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername());
+        return createToken(claims, userDetails.getUsername(), JWT_TOKEN_VALIDITY);
     }
 
-    private String createToken(Map<String, Object> claims, String subject) {
+    public String generateRefreshToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("tokenType", "refresh");
+        return createToken(claims, userDetails.getUsername(), JWT_REFRESH_TOKEN_VALIDITY);
+    }
+
+    private String createToken(Map<String, Object> claims, String subject, long validity) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + validity * 1000))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
     }
@@ -70,5 +77,13 @@ public class JwtTokenUtil {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public long getExpirationTime() {
+        return JWT_TOKEN_VALIDITY;
+    }
+
+    public long getRefreshExpirationTime() {
+        return JWT_REFRESH_TOKEN_VALIDITY;
     }
 }

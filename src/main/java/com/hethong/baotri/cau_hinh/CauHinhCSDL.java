@@ -3,7 +3,6 @@ package com.hethong.baotri.cau_hinh;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -32,7 +31,7 @@ public class CauHinhCSDL {
         log.info("Database Username: {}", databaseUsername);
     }
 
-    @Bean
+    @EventListener(ApplicationReadyEvent.class)
     public void kiemTraCauHinhCSDL(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             log.info("Kết nối cơ sở dữ liệu thành công!");

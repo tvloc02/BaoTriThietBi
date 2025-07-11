@@ -95,10 +95,10 @@ public class ThietBi {
     @Column(name = "don_vi_cong_suat", length = 20)
     private String donViCongSuat;
 
-    @Column(name = "dien_ap_hoat_dong", precision = 10, 2)
+    @Column(name = "dien_ap_hoat_dong", precision = 10, scale = 2)
     private BigDecimal dienApHoatDong;
 
-    @Column(name = "dong_dien_hoat_dong", precision = 10, 2)
+    @Column(name = "dong_dien_hoat_dong", precision = 10, scale = 2)
     private BigDecimal dongDienHoatDong;
 
     @Column(name = "nhiet_do_hoat_dong_min", precision = 5, scale = 2)
@@ -177,17 +177,18 @@ public class ThietBi {
     @OneToMany(mappedBy = "thietBi", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<ThongSoThietBi> thongSoThietBiSet = new HashSet<>();
 
-    // Quan hệ One-to-Many với LichSuBaoTri
-    @OneToMany(mappedBy = "thietBi", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<com.hethong.baotri.thuc_the.bao_tri.LichSuBaoTri> lichSuBaoTriSet = new HashSet<>();
-
     // Quan hệ One-to-Many với YeuCauBaoTri
     @OneToMany(mappedBy = "thietBi", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<com.hethong.baotri.thuc_the.bao_tri.YeuCauBaoTri> yeuCauBaoTriSet = new HashSet<>();
 
-    // Quan hệ One-to-Many với CanhBaoLoi
-    @OneToMany(mappedBy = "thietBi", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<com.hethong.baotri.thuc_the.bao_tri.CanhBaoLoi> canhBaoLoiSet = new HashSet<>();
+    // Quan hệ Many-to-Many với VatTu (vật tư liên quan)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "thiet_bi_vat_tu",
+            joinColumns = @JoinColumn(name = "id_thiet_bi"),
+            inverseJoinColumns = @JoinColumn(name = "id_vat_tu")
+    )
+    private Set<com.hethong.baotri.thuc_the.vat_tu.VatTu> vatTuLienQuanSet = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
