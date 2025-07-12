@@ -19,7 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = {"thietBi"})
-class CanhBaoLoi {
+public class CanhBaoLoi {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

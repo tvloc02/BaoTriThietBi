@@ -4,24 +4,32 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class JwtTokenUtil {
 
-    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60; // 5 hours
-    public static final long JWT_REFRESH_TOKEN_VALIDITY = 7 * 24 * 60 * 60; // 7 days
-
-    @Value("${jwt.secret:hethongbaotri}")
+    @Value("${jwt.secret:mySecretKey12345678901234567890123456789012345678901234567890}")
     private String secret;
+
+    @Value("${jwt.expiration:86400}") // 24 hours
+    private Long jwtExpiration;
+
+    @Value("${jwt.refresh-expiration:604800}") // 7 days
+    private Long refreshExpiration;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
@@ -55,35 +63,50 @@ public class JwtTokenUtil {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername(), JWT_TOKEN_VALIDITY);
+
+        // Thêm authorities vào claims
+        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+        claims.put("authorities", authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList()));
+
+        return createToken(claims, userDetails.getUsername(), jwtExpiration);
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("tokenType", "refresh");
-        return createToken(claims, userDetails.getUsername(), JWT_REFRESH_TOKEN_VALIDITY);
+        claims.put("type", "refresh");
+        return createToken(claims, userDetails.getUsername(), refreshExpiration);
     }
 
-    private String createToken(Map<String, Object> claims, String subject, long validity) {
+    private String createToken(Map<String, Object> claims, String subject, Long expiration) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expiration * 1000);
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + validity * 1000))
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = getUsernameFromToken(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        try {
+            final String username = getUsernameFromToken(token);
+            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        } catch (Exception e) {
+            log.error("Token validation failed: {}", e.getMessage());
+            return false;
+        }
     }
 
-    public long getExpirationTime() {
-        return JWT_TOKEN_VALIDITY;
+    public Long getExpirationTime() {
+        return jwtExpiration;
     }
 
-    public long getRefreshExpirationTime() {
-        return JWT_REFRESH_TOKEN_VALIDITY;
+    public Long getRefreshExpirationTime() {
+        return refreshExpiration;
     }
 }

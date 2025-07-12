@@ -19,7 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = {"yeuCauBaoTri", "lichSuBaoTriSet"})
-class CongViecBaoTri {
+public class CongViecBaoTri {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
