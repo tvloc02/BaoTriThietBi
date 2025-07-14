@@ -1,3 +1,4 @@
+// KiemTraDinhKyRepository - sửa lỗi kiểu dữ liệu
 package com.hethong.baotri.kho_du_lieu.bao_tri;
 
 import com.hethong.baotri.thuc_the.bao_tri.KiemTraDinhKy;

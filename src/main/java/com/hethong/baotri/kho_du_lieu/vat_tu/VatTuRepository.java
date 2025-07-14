@@ -39,4 +39,16 @@ public interface VatTuRepository extends JpaRepository<VatTu, Long> {
 
     @Query("SELECT SUM(vt.soLuongTonKho * vt.giaNhap) FROM VatTu vt WHERE vt.trangThaiHoatDong = true")
     java.math.BigDecimal tinhTongGiaTriTonKho();
+
+    // Tìm theo mức độ quan trọng
+    List<VatTu> findByMucDoQuanTrong(Integer mucDoQuanTrong);
+
+    // Tìm theo loại vật tư
+    Page<VatTu> findByLoaiVatTu(String loaiVatTu, Pageable pageable);
+
+    // Tìm vật tư quan trọng
+    List<VatTu> findByVatTuQuanTrong(Boolean vatTuQuanTrong);
+
+    // Tìm vật tư yêu cầu kiểm tra
+    List<VatTu> findByYeuCauKiemTra(Boolean yeuCauKiemTra);
 }

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+@Entity // THÊM ANNOTATION @Entity
 @Table(name = "phan_cong_cong_viec")
 @Data
 @NoArgsConstructor

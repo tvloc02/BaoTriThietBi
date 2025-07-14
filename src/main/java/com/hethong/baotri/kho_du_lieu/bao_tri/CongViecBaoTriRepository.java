@@ -15,33 +15,29 @@ import java.util.Optional;
 @Repository
 public interface CongViecBaoTriRepository extends JpaRepository<CongViecBaoTri, Long> {
 
-    // Tìm theo mã công việc
-    Optional<CongViecBaoTri> findByMaCongViec(String maCongViec);
-
-    // Kiểm tra mã công việc tồn tại
-    boolean existsByMaCongViec(String maCongViec);
-
     // Tìm theo trạng thái
     Page<CongViecBaoTri> findByTrangThai(String trangThai, Pageable pageable);
 
-    // Tìm theo loại công việc
-    List<CongViecBaoTri> findByLoaiCongViec(String loaiCongViec);
+    // Tìm theo loại công việc - LOẠI BỎ VÌ KHÔNG CÓ TRƯỜNG NÀY
+    // List<CongViecBaoTri> findByLoaiCongViec(String loaiCongViec);
 
     // Tìm theo người thực hiện
     Page<CongViecBaoTri> findByNguoiThucHien_IdNguoiDung(Long idNguoiDung, Pageable pageable);
 
-    // Tìm theo thiết bị
-    Page<CongViecBaoTri> findByThietBi_IdThietBi(Long idThietBi, Pageable pageable);
+    // Tìm theo thiết bị thông qua yêu cầu bảo trì
+    @Query("SELECT cv FROM CongViecBaoTri cv WHERE cv.yeuCauBaoTri.thietBi.idThietBi = :idThietBi")
+    Page<CongViecBaoTri> findByThietBi_IdThietBi(@Param("idThietBi") Long idThietBi, Pageable pageable);
 
-    // Tìm theo kế hoạch bảo trì
-    List<CongViecBaoTri> findByKeHoachBaoTri_IdKeHoach(Long idKeHoach);
+    // Tìm theo kế hoạch bảo trì - SỬA LỖI CHÍNH
+    @Query("SELECT cv FROM CongViecBaoTri cv WHERE cv.yeuCauBaoTri.keHoachBaoTri.idKeHoach = :idKeHoach")
+    List<CongViecBaoTri> findByKeHoachBaoTri_IdKeHoach(@Param("idKeHoach") Long idKeHoach);
 
     // Tìm công việc ưu tiên
-    @Query("SELECT cv FROM CongViecBaoTri cv WHERE cv.mucDoUuTien >= :mucDo AND cv.trangThai != 'COMPLETED'")
+    @Query("SELECT cv FROM CongViecBaoTri cv WHERE cv.yeuCauBaoTri.mucDoUuTien >= :mucDo AND cv.trangThai != 'HOAN_THANH'")
     List<CongViecBaoTri> findCongViecUuTien(@Param("mucDo") Integer mucDo);
 
     // Tìm công việc quá hạn
-    @Query("SELECT cv FROM CongViecBaoTri cv WHERE cv.ngayKetThucDuKien < :ngayHienTai AND cv.trangThai != 'COMPLETED'")
+    @Query("SELECT cv FROM CongViecBaoTri cv WHERE cv.ngayHoanThanh IS NULL AND cv.yeuCauBaoTri.ngayMongMuon < :ngayHienTai AND cv.trangThai != 'HOAN_THANH'")
     List<CongViecBaoTri> findCongViecQuaHan(@Param("ngayHienTai") LocalDateTime ngayHienTai);
 
     // Đếm theo trạng thái
@@ -55,4 +51,15 @@ public interface CongViecBaoTriRepository extends JpaRepository<CongViecBaoTri, 
     // Thống kê theo trạng thái
     @Query("SELECT cv.trangThai, COUNT(cv) FROM CongViecBaoTri cv GROUP BY cv.trangThai")
     List<Object[]> thongKeTheoTrangThai();
+
+    // Tìm công việc theo yêu cầu bảo trì
+    List<CongViecBaoTri> findByYeuCauBaoTri_IdYeuCau(Long idYeuCau);
+
+    // Tìm công việc đang thực hiện của người dùng
+    @Query("SELECT cv FROM CongViecBaoTri cv WHERE cv.nguoiThucHien.idNguoiDung = :idNguoiDung AND cv.trangThai = 'DANG_THUC_HIEN'")
+    List<CongViecBaoTri> findCongViecDangThucHienCuaNguoiDung(@Param("idNguoiDung") Long idNguoiDung);
+
+    // Tìm công việc theo khoảng thời gian
+    @Query("SELECT cv FROM CongViecBaoTri cv WHERE cv.ngayBatDau BETWEEN :tuNgay AND :denNgay")
+    List<CongViecBaoTri> findByNgayBatDauBetween(@Param("tuNgay") LocalDateTime tuNgay, @Param("denNgay") LocalDateTime denNgay);
 }

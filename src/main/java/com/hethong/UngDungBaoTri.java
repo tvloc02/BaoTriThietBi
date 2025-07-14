@@ -27,9 +27,12 @@ public class UngDungBaoTri {
         SpringApplication.run(UngDungBaoTri.class, args);
         System.out.println("=== HỆ THỐNG QUẢN LÝ BẢO TRÌ THIẾT BỊ ===");
         System.out.println("Ứng dụng đã khởi động thành công!");
-        System.out.println("Truy cập: http://localhost:8081");
+        System.out.println("Đăng nhập: http://localhost:8081/");
+        System.out.println("Trang chủ: http://localhost:8081/trang-chu");
+        System.out.println("API Test:  http://localhost:8081/api/test/hello");
+        System.out.println("API Trang chủ: http://localhost:8081/api/trang-chu/thong-ke-tong-quan");
         System.out.println("Database: SQL Server (lov:1433)");
-        System.out.println("API Test: http://localhost:8081/api/test/hello");
+        System.out.println("Demo Login: admin / 123456");
         System.out.println("========================================");
     }
 

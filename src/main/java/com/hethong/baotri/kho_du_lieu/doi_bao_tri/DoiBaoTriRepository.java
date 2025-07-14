@@ -34,4 +34,10 @@ public interface DoiBaoTriRepository extends JpaRepository<DoiBaoTri, Long> {
 
     @Query("SELECT d.chuyenMon, COUNT(d) FROM DoiBaoTri d GROUP BY d.chuyenMon")
     List<Object[]> thongKeTheoChuyenMon();
+
+    // Tìm theo trưởng đội
+    Page<DoiBaoTri> findByTruongDoi_IdNguoiDung(Long idNguoiDung, Pageable pageable);
+
+    // Tìm theo phó đội
+    Page<DoiBaoTri> findByPhoDoi_IdNguoiDung(Long idNguoiDung, Pageable pageable);
 }

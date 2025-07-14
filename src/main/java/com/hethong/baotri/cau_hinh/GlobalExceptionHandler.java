@@ -1,90 +1,69 @@
 package com.hethong.baotri.cau_hinh;
 
-import com.hethong.baotri.ngoai_le.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.HttpServletRequest;
 
-@RestControllerAdvice
+@Controller
+@ControllerAdvice
 @Slf4j
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler implements ErrorController {
 
-    @ExceptionHandler(NgoaiLeBaoTri.class)
-    public ResponseEntity<Map<String, Object>> handleNgoaiLeBaoTri(NgoaiLeBaoTri e) {
-        log.error("Lỗi bảo trì: {}", e.getMessage());
-        return createErrorResponse(HttpStatus.BAD_REQUEST, "Lỗi bảo trì", e.getMessage());
-    }
+    @RequestMapping("/error")
+    public String handleError(HttpServletRequest request, Model model) {
+        Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+        Object message = request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
+        Object exception = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
 
-    @ExceptionHandler(NgoaiLeThietBi.class)
-    public ResponseEntity<Map<String, Object>> handleNgoaiLeThietBi(NgoaiLeThietBi e) {
-        log.error("Lỗi thiết bị: {}", e.getMessage());
-        return createErrorResponse(HttpStatus.BAD_REQUEST, "Lỗi thiết bị", e.getMessage());
-    }
+        if (status != null) {
+            Integer statusCode = Integer.valueOf(status.toString());
 
-    @ExceptionHandler(NgoaiLeVatTu.class)
-    public ResponseEntity<Map<String, Object>> handleNgoaiLeVatTu(NgoaiLeVatTu e) {
-        log.error("Lỗi vật tư: {}", e.getMessage());
-        return createErrorResponse(HttpStatus.BAD_REQUEST, "Lỗi vật tư", e.getMessage());
-    }
+            log.error("Error {} occurred: {}", statusCode, message);
 
-    @ExceptionHandler(NgoaiLeNguoiDung.class)
-    public ResponseEntity<Map<String, Object>> handleNgoaiLeNguoiDung(NgoaiLeNguoiDung e) {
-        log.error("Lỗi người dùng: {}", e.getMessage());
-        return createErrorResponse(HttpStatus.BAD_REQUEST, "Lỗi người dùng", e.getMessage());
-    }
+            model.addAttribute("statusCode", statusCode);
+            model.addAttribute("message", message);
 
-    @ExceptionHandler(NgoaiLeDoiBaoTri.class)
-    public ResponseEntity<Map<String, Object>> handleNgoaiLeDoiBaoTri(NgoaiLeDoiBaoTri e) {
-        log.error("Lỗi đội bảo trì: {}", e.getMessage());
-        return createErrorResponse(HttpStatus.BAD_REQUEST, "Lỗi đội bảo trì", e.getMessage());
-    }
+            if (statusCode == HttpStatus.NOT_FOUND.value()) {
+                model.addAttribute("title", "Trang không tìm thấy - 404");
+                model.addAttribute("errorTitle", "Oops! Trang không tồn tại");
+                model.addAttribute("errorMessage", "Trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.");
+                return "error/404";
+            } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+                model.addAttribute("title", "Lỗi hệ thống - 500");
+                model.addAttribute("errorTitle", "Lỗi hệ thống");
+                model.addAttribute("errorMessage", "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.");
+                return "error/500";
+            } else if (statusCode == HttpStatus.FORBIDDEN.value()) {
+                model.addAttribute("title", "Không có quyền truy cập - 403");
+                model.addAttribute("errorTitle", "Không có quyền truy cập");
+                model.addAttribute("errorMessage", "Bạn không có quyền truy cập vào trang này.");
+                return "error/403";
+            }
+        }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Validation Failed");
-        response.put("message", "Dữ liệu đầu vào không hợp lệ");
-        response.put("errors", errors);
-
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException e) {
-        log.error("Từ chối truy cập: {}", e.getMessage());
-        return createErrorResponse(HttpStatus.FORBIDDEN, "Từ chối truy cập", "Bạn không có quyền thực hiện chức năng này");
+        model.addAttribute("title", "Lỗi hệ thống");
+        model.addAttribute("errorTitle", "Đã xảy ra lỗi");
+        model.addAttribute("errorMessage", "Vui lòng thử lại sau hoặc liên hệ quản trị viên.");
+        return "error/general";
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(Exception e) {
-        log.error("Lỗi không xác định: {}", e.getMessage(), e);
-        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi hệ thống", "Đã xảy ra lỗi không xác định");
-    }
+    public String handleGenericException(Exception e, Model model) {
+        log.error("Unexpected error occurred", e);
 
-    private ResponseEntity<Map<String, Object>> createErrorResponse(HttpStatus status, String error, String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", status.value());
-        response.put("error", error);
-        response.put("message", message);
-        return new ResponseEntity<>(response, status);
+        model.addAttribute("title", "Lỗi hệ thống");
+        model.addAttribute("errorTitle", "Đã xảy ra lỗi không mong muốn");
+        model.addAttribute("errorMessage", "Vui lòng thử lại sau hoặc liên hệ quản trị viên.");
+        model.addAttribute("exception", e.getMessage());
+
+        return "error/general";
     }
 }
