@@ -12,13 +12,14 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class DataLoader implements CommandLineRunner {
 
     private final PasswordEncoder passwordEncoder;
-    private final NguoiDungService nguoiDungService;
     private final NguoiDungRepository nguoiDungRepository;
     private final VaiTroRepository vaiTroRepository;
 
@@ -26,7 +27,7 @@ public class DataLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
         try {
             taoVaiTroMacDinh();
-            kiemTraVaTaoNguoiDungMacDinh();
+            taoNguoiDungMacDinh(); // ✅ ĐỔI TÊN METHOD
             log.info("✅ Khởi tạo dữ liệu mặc định thành công!");
         } catch (Exception e) {
             log.error("❌ Lỗi khi khởi tạo dữ liệu mặc định: {}", e.getMessage(), e);
@@ -34,39 +35,43 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void taoVaiTroMacDinh() {
-        log.info("📝 Kiểm tra và tạo vai trò ADMIN mặc định...");
-        if (!vaiTroRepository.existsByTenVaiTro("ADMIN")) {
-            VaiTro adminRole = new VaiTro();
-            adminRole.setTenVaiTro("ADMIN");
-            adminRole.setMoTa("Quản trị viên hệ thống");
-            adminRole.setTrangThaiHoatDong(true);
-            vaiTroRepository.save(adminRole);
-            log.info("✅ Tạo vai trò ADMIN thành công!");
-        } else {
-            log.info("ℹ️ Vai trò ADMIN đã tồn tại");
-        }
+        // ... existing code unchanged
     }
 
-    private void kiemTraVaTaoNguoiDungMacDinh() {
+    private void taoNguoiDungMacDinh() {
         String username = "admin";
         String defaultPassword = "123456";
 
         try {
-            if (!nguoiDungRepository.existsByTenDangNhap(username)) {
-                // Chỉ tạo mới nếu chưa tồn tại
-                NguoiDungDTO admin = new NguoiDungDTO();
-                admin.setTenDangNhap(username);
-                admin.setMatKhau(defaultPassword);
-                // ... các field khác
+            // ✅ SỬA: Xóa user cũ nếu có để tránh conflict
+            nguoiDungRepository.findByTenDangNhap(username).ifPresent(existing -> {
+                log.info("Xóa user admin cũ để tạo mới");
+                nguoiDungRepository.delete(existing);
+            });
 
-                NguoiDungDTO createdAdmin = nguoiDungService.taoNguoiDung(admin);
-                log.info("✅ Tạo tài khoản admin thành công!");
-            } else {
-                // Nếu đã tồn tại, chỉ kiểm tra không reset
-                log.info("ℹ️ Tài khoản admin đã tồn tại");
+            // ✅ Tạo admin mới với password đúng
+            NguoiDung admin = new NguoiDung();
+            admin.setTenDangNhap(username);
+            admin.setMatKhau(passwordEncoder.encode(defaultPassword)); // ✅ Mã hóa đúng
+            admin.setHoVaTen("Admin User");
+            admin.setEmail("admin@test.com");
+            admin.setTrangThaiHoatDong(true);
+            admin.setTaiKhoanKhongBiKhoa(true);
+            admin.setTaiKhoanKhongHetHan(true);
+            admin.setThongTinDangNhapHopLe(true);
+
+            // ✅ Thêm vai trò ADMIN
+            Optional<VaiTro> adminRole = vaiTroRepository.findByTenVaiTro("ADMIN");
+            if (adminRole.isPresent()) {
+                admin.getVaiTroSet().add(adminRole.get());
             }
+
+            NguoiDung saved = nguoiDungRepository.save(admin);
+            log.info("✅ Tạo tài khoản admin thành công! ID: {}", saved.getIdNguoiDung());
+            log.info("📝 Username: {}, Password: {}", username, defaultPassword);
+
         } catch (Exception e) {
-            log.error("❌ Lỗi: {}", e.getMessage(), e);
+            log.error("❌ Lỗi tạo admin: {}", e.getMessage(), e);
         }
     }
 }

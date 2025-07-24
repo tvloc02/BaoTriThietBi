@@ -33,49 +33,67 @@ public class XacThucService {
     private final NguoiDungRepository nguoiDungRepository;
     private final JwtTokenUtil jwtTokenUtil;
     private final PasswordEncoder passwordEncoder;
+    private final CustomUserDetailsService userDetailsService; // ✅ THÊM
 
-    @Autowired
-    @Lazy  // Add @Lazy to break circular dependency
-    private AuthenticationManager authenticationManager;
+    private AuthenticationManager authenticationManager; // ✅ SỬA: Không inject qua constructor
 
     public XacThucService(NguoiDungRepository nguoiDungRepository,
                           JwtTokenUtil jwtTokenUtil,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder,
+                          CustomUserDetailsService userDetailsService) {
         this.nguoiDungRepository = nguoiDungRepository;
         this.jwtTokenUtil = jwtTokenUtil;
         this.passwordEncoder = passwordEncoder;
+        this.userDetailsService = userDetailsService;
+    }
+
+    @Autowired
+    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
     }
 
     public Map<String, Object> dangNhap(String tenDangNhap, String matKhau) {
         log.info("Đang xử lý đăng nhập cho: {}", tenDangNhap);
 
         try {
-            // Xác thực trực tiếp thông qua AuthenticationManager
+            // ✅ SỬA: Kiểm tra user exists trước
+            NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhap(tenDangNhap)
+                    .orElseThrow(() -> new BadCredentialsException("Tên đăng nhập không tồn tại"));
+
+            log.debug("Found user: {}", nguoiDung.getTenDangNhap());
+            log.debug("User enabled: {}", nguoiDung.isEnabled());
+            log.debug("Account non-locked: {}", nguoiDung.isAccountNonLocked());
+            log.debug("Stored password: {}", nguoiDung.getMatKhau());
+
+            // ✅ SỬA: Kiểm tra password trực tiếp trước
+            if (!passwordEncoder.matches(matKhau, nguoiDung.getMatKhau())) {
+                log.warn("Password mismatch for user: {}", tenDangNhap);
+                xuLyDangNhapThatBaiTrucTiep(tenDangNhap);
+                throw new BadCredentialsException("Mật khẩu không đúng");
+            }
+
+            // Authentication với Spring Security
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(tenDangNhap, matKhau)
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // Lấy UserDetails từ authentication result
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
             // Tạo JWT token
             String accessToken = jwtTokenUtil.generateToken(userDetails);
             String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
 
-            // Cập nhật lần đăng nhập cuối - trực tiếp thông qua repository
+            // Cập nhật lần đăng nhập cuối
             capNhatLanDangNhapCuoiTrucTiep(tenDangNhap);
 
-            // Lấy thông tin người dùng từ database
-            Optional<NguoiDung> nguoiDungOpt = nguoiDungRepository.findByTenDangNhap(tenDangNhap);
-
             Map<String, Object> response = new HashMap<>();
+            response.put("success", true); // ✅ THÊM
             response.put("accessToken", accessToken);
             response.put("refreshToken", refreshToken);
             response.put("tokenType", "Bearer");
             response.put("expiresIn", jwtTokenUtil.getExpirationTime());
-            response.put("nguoiDung", nguoiDungOpt.orElse(null));
+            response.put("nguoiDung", nguoiDung);
             response.put("message", "Đăng nhập thành công");
 
             log.info("Đăng nhập thành công cho: {}", tenDangNhap);
@@ -89,6 +107,9 @@ public class XacThucService {
             log.warn("Thông tin đăng nhập không hợp lệ: {}", tenDangNhap);
             xuLyDangNhapThatBaiTrucTiep(tenDangNhap);
             throw new NgoaiLeNguoiDung("Tên đăng nhập hoặc mật khẩu không đúng");
+        } catch (Exception e) {
+            log.error("Lỗi đăng nhập: ", e);
+            throw new NgoaiLeNguoiDung("Đăng nhập thất bại: " + e.getMessage());
         }
     }
 

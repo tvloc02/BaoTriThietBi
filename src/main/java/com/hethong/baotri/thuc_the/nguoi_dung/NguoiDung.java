@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -121,32 +123,19 @@ public class NguoiDung implements UserDetails {
         ngayCapNhat = LocalDateTime.now();
     }
 
-    /**
-     * Phương thức thêm vai trò cho người dùng
-     *
-     * @param vaiTro vai trò cần thêm
-     */
+
     public void themVaiTro(VaiTro vaiTro) {
         this.vaiTroSet.add(vaiTro);
         vaiTro.getNguoiDungSet().add(this);
     }
 
-    /**
-     * Phương thức xóa vai trò khỏi người dùng
-     *
-     * @param vaiTro vai trò cần xóa
-     */
+
     public void xoaVaiTro(VaiTro vaiTro) {
         this.vaiTroSet.remove(vaiTro);
         vaiTro.getNguoiDungSet().remove(this);
     }
 
-    /**
-     * Kiểm tra người dùng có vai trò cụ thể hay không
-     *
-     * @param tenVaiTro tên vai trò cần kiểm tra
-     * @return true nếu có vai trò, false nếu không
-     */
+
     public boolean coVaiTro(String tenVaiTro) {
         return vaiTroSet.stream()
                 .anyMatch(vaiTro -> vaiTro.getTenVaiTro().equals(tenVaiTro));
@@ -179,15 +168,29 @@ public class NguoiDung implements UserDetails {
         this.soLanDangNhapThatBai = 0;
         this.thoiGianKhoaTaiKhoan = null;
     }
-
+    private static final Logger log = LoggerFactory.getLogger(NguoiDung.class);
     // Implement UserDetails interface
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return vaiTroSet.stream()
-                .flatMap(vaiTro -> vaiTro.getQuyenSet().stream())
-                .map(quyen -> new SimpleGrantedAuthority(quyen.getTenQuyen()))
-                .collect(Collectors.toSet());
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+        if (vaiTroSet != null) {
+            for (VaiTro vaiTro : vaiTroSet) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + vaiTro.getTenVaiTro()));
+
+                if (vaiTro.getQuyenSet() != null) {
+                    for (Quyen quyen : vaiTro.getQuyenSet()) {
+                        authorities.add(new SimpleGrantedAuthority(quyen.getTenQuyen()));
+                    }
+                }
+            }
+        }
+
+
+        log.debug("User {} has authorities: {}", tenDangNhap, authorities);
+        return authorities;
     }
+
 
     @Override
     public String getPassword() {

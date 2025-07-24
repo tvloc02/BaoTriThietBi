@@ -21,34 +21,23 @@ public class CauHinhBaoMat {
 
     private final PasswordEncoder passwordEncoder;
 
-    @Qualifier("customUserDetailsService")
-    private final UserDetailsService customUserDetailsService;
+    // ✅ SỬA: Chỉ dùng một UserDetailsService
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authz -> authz
-                        // Static resources - Cho phép tất cả
                         .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico").permitAll()
-
-                        // ✅ H2 Console - Cho phép truy cập không cần xác thực
                         .requestMatchers("/h2-console/**").permitAll()
-
-                        // API endpoints - Cho phép không cần xác thực
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
                         .requestMatchers("/api/debug/**").permitAll()
-
-                        // Dashboard và các trang khác - Cần xác thực
-                        .requestMatchers("/dashboard").authenticated()
-                        .requestMatchers("/trang-chu").authenticated()
-
-                        // Tất cả các request khác - Cần xác thực
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .loginProcessingUrl("/login") // URL xử lý form login
+                        .loginProcessingUrl("/authenticate") // ✅ ĐỔI URL để tránh conflict
                         .usernameParameter("username")
                         .passwordParameter("password")
                         .defaultSuccessUrl("/dashboard", true)
@@ -62,15 +51,9 @@ public class CauHinhBaoMat {
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/h2-console/**") // ✅ Bỏ qua CSRF cho H2 Console
-                        .disable()) // Tạm thời disable CSRF để test
+                .csrf(csrf -> csrf.disable()) // ✅ Disable CSRF cho API
                 .headers(headers -> headers
-                        .frameOptions(frameOptions -> frameOptions.sameOrigin()) // ✅ Cho phép H2 Console trong iframe
-                )
-                .sessionManagement(session -> session
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false)
+                        .frameOptions(frameOptions -> frameOptions.sameOrigin())
                 );
 
         return http.build();

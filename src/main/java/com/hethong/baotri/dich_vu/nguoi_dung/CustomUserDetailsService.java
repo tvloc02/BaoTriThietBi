@@ -1,6 +1,7 @@
 package com.hethong.baotri.dich_vu.nguoi_dung;
 
 import com.hethong.baotri.kho_du_lieu.nguoi_dung.NguoiDungRepository;
+import com.hethong.baotri.thuc_the.nguoi_dung.NguoiDung;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,10 +22,17 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.debug("CustomUserDetailsService - Loading user: {}", username);
 
-        return nguoiDungRepository.findByTenDangNhap(username)
+        NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhap(username)
                 .orElseThrow(() -> {
                     log.error("User not found: {}", username);
                     return new UsernameNotFoundException("Không tìm thấy người dùng: " + username);
                 });
+
+        log.debug("Found user: {}, enabled: {}, accountNonLocked: {}",
+                nguoiDung.getTenDangNhap(),
+                nguoiDung.isEnabled(),
+                nguoiDung.isAccountNonLocked());
+
+        return nguoiDung;
     }
 }

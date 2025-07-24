@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/debug")
@@ -20,30 +21,30 @@ public class DebugController {
     private final NguoiDungRepository nguoiDungRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @GetMapping("/check-database")
-    public ResponseEntity<Map<String, Object>> checkDatabase() {
+    @GetMapping("/test-password")
+    public ResponseEntity<Map<String, Object>> testPassword(@RequestParam String username, @RequestParam String password) {
         Map<String, Object> result = new HashMap<>();
 
         try {
-            // Đếm tổng số user
-            long totalUsers = nguoiDungRepository.count();
-            result.put("totalUsers", totalUsers);
+            Optional<NguoiDung> userOpt = nguoiDungRepository.findByTenDangNhap(username);
 
-            // Lấy tất cả username
-            List<NguoiDung> users = nguoiDungRepository.findAll();
-            result.put("usernames", users.stream().map(NguoiDung::getTenDangNhap).toList());
+            if (userOpt.isPresent()) {
+                NguoiDung user = userOpt.get();
+                boolean matches = passwordEncoder.matches(password, user.getMatKhau());
 
-            // Kiểm tra admin có tồn tại không
-            boolean adminExists = nguoiDungRepository.existsByTenDangNhap("admin");
-            result.put("adminExists", adminExists);
-
-            if (adminExists) {
-                var admin = nguoiDungRepository.findByTenDangNhap("admin").orElse(null);
-                if (admin != null) {
-                    result.put("adminPassword", admin.getMatKhau());
-                    result.put("adminActive", admin.getTrangThaiHoatDong());
-                    result.put("adminNotLocked", admin.getTaiKhoanKhongBiKhoa());
-                }
+                result.put("userExists", true);
+                result.put("username", user.getTenDangNhap());
+                result.put("storedPassword", user.getMatKhau());
+                result.put("inputPassword", password);
+                result.put("passwordMatches", matches);
+                result.put("enabled", user.isEnabled());
+                result.put("accountNonLocked", user.isAccountNonLocked());
+                result.put("accountNonExpired", user.isAccountNonExpired());
+                result.put("credentialsNonExpired", user.isCredentialsNonExpired());
+                result.put("authorities", user.getAuthorities().toString());
+            } else {
+                result.put("userExists", false);
+                result.put("message", "User not found");
             }
 
             result.put("status", "SUCCESS");
@@ -56,46 +57,4 @@ public class DebugController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/create-admin")
-    public ResponseEntity<Map<String, Object>> createAdmin() {
-        Map<String, Object> result = new HashMap<>();
-
-        try {
-            // Xóa admin cũ nếu có
-            nguoiDungRepository.findByTenDangNhap("admin").ifPresent(
-                    admin -> nguoiDungRepository.delete(admin)
-            );
-
-            // Tạo admin mới
-            NguoiDung newAdmin = new NguoiDung();
-            newAdmin.setTenDangNhap("admin");
-            newAdmin.setMatKhau(passwordEncoder.encode("123456"));
-            newAdmin.setHoVaTen("Admin User");
-            newAdmin.setEmail("admin@test.com");
-            newAdmin.setTrangThaiHoatDong(true);
-            newAdmin.setTaiKhoanKhongBiKhoa(true);
-
-            NguoiDung saved = nguoiDungRepository.save(newAdmin);
-
-            result.put("status", "SUCCESS");
-            result.put("message", "Admin created successfully");
-            result.put("adminId", saved.getIdNguoiDung());
-            result.put("username", saved.getTenDangNhap());
-            result.put("encodedPassword", saved.getMatKhau());
-            result.put("testPassword", "123456");
-
-        } catch (Exception e) {
-            result.put("status", "ERROR");
-            result.put("error", e.getMessage());
-            e.printStackTrace();
-        }
-
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/create-admin-get")
-    public ResponseEntity<Map<String, Object>> createAdminGet() {
-        // Wrapper cho GET request
-        return createAdmin();
-    }
 }

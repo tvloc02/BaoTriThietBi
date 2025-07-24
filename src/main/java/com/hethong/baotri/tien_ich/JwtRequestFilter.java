@@ -1,6 +1,6 @@
 package com.hethong.baotri.tien_ich;
 
-import com.hethong.baotri.dich_vu.nguoi_dung.NguoiDungService;
+import com.hethong.baotri.dich_vu.nguoi_dung.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +22,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-    private final NguoiDungService nguoiDungService;
+    // ✅ SỬA: Sử dụng CustomUserDetailsService thay vì NguoiDungService
+    private final CustomUserDetailsService customUserDetailsService;
     private final JwtTokenUtil jwtTokenUtil;
 
     @Override
@@ -37,7 +38,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 String username = jwtTokenUtil.getUsernameFromToken(jwt);
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = nguoiDungService.loadUserByUsername(username);
+                    // ✅ SỬA: Sử dụng customUserDetailsService thay vì nguoiDungService
+                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
 
                     if (jwtTokenUtil.validateToken(jwt, userDetails)) {
                         UsernamePasswordAuthenticationToken authentication =
@@ -71,10 +73,24 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
+
+        // ✅ THÊM: Thêm các path cần bỏ qua filter JWT
         return path.startsWith("/api/auth/") ||
                 path.startsWith("/api/public/") ||
+                path.startsWith("/api/debug/") ||  // ✅ THÊM: cho debug endpoint
+                path.startsWith("/api/test/") ||   // ✅ THÊM: cho test endpoint
                 path.startsWith("/swagger-ui/") ||
                 path.startsWith("/v3/api-docs/") ||
-                path.equals("/actuator/health");
+                path.equals("/actuator/health") ||
+                path.equals("/login") ||           // ✅ THÊM: login page
+                path.equals("/logout") ||          // ✅ THÊM: logout
+                path.equals("/authenticate") ||    // ✅ THÊM: form login processing
+                path.startsWith("/css/") ||        // ✅ THÊM: static resources
+                path.startsWith("/js/") ||
+                path.startsWith("/images/") ||
+                path.startsWith("/webjars/") ||
+                path.equals("/favicon.ico") ||
+                path.equals("/") ||                // ✅ THÊM: root path
+                path.startsWith("/h2-console/");   // ✅ THÊM: H2 console
     }
 }

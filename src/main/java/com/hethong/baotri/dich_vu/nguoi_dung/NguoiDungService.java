@@ -27,19 +27,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class NguoiDungService implements UserDetailsService {
+public class NguoiDungService {
 
     private final NguoiDungRepository nguoiDungRepository;
     private final VaiTroRepository vaiTroRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.debug("Loading user by username: {}", username);
-        return nguoiDungRepository.findByTenDangNhap(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng: " + username));
-    }
 
     public void capNhatLanDangNhapCuoi(String tenDangNhap) {
         log.debug("Cập nhật lần đăng nhập cuối cho: {}", tenDangNhap);
