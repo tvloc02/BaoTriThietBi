@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - DashStack</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .welcome h1 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-info .username {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .user-info .role {
+            color: #667eea;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card.users .icon { color: #667eea; }
+        .stat-card.devices .icon { color: #f093fb; }
+        .stat-card.maintenance .icon { color: #4facfe; }
+        .stat-card.alerts .icon { color: #43e97b; }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .label {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+            text-decoration: none;
+            color: #667eea;
+        }
+
+        .action-btn .icon {
+            font-size: 1.5rem;
+            color: #667eea;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .logout-btn:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .success-message {
+            background: #4caf50;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .header { flex-direction: column; text-align: center; gap: 1rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .actions { grid-template-columns: 1fr; }
+            .logout-btn { position: relative; top: 0; right: 0; margin: 1rem auto; }
+        }
+    </style>
+</head>
+<body>
+<a href="/logout" class="logout-btn">
+    <i class="fas fa-sign-out-alt"></i>
+    Đăng xuất
+</a>
+
+<div class="container">
+    <div class="success-message">
+        <i class="fas fa-check-circle"></i>
+        Đăng nhập thành công! Chào mừng đến với hệ thống quản lý bảo trì thiết bị.
+    </div>
+
+    <div class="header">
+        <div class="welcome">
+            <h1><i class="fas fa-cogs"></i> DashStack</h1>
+            <p>Hệ thống quản lý bảo trì thiết bị công nghiệp</p>
+        </div>
+        <div class="user-info">
+            <div class="username">
+                <i class="fas fa-user"></i>
+                <span th:text="${tenDangNhap ?: 'admin'}">admin</span>
+            </div>
+            <div class="role">
+                <span th:text="${authorities ?: 'ROLE_ADMIN'}">ROLE_ADMIN</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card users">
+            <div class="icon"><i class="fas fa-users"></i></div>
+            <div class="value">1,245</div>
+            <div class="label">Người dùng</div>
+        </div>
+        <div class="stat-card devices">
+            <div class="icon"><i class="fas fa-cogs"></i></div>
+            <div class="value">856</div>
+            <div class="label">Thiết bị</div>
+        </div>
+        <div class="stat-card maintenance">
+            <div class="icon"><i class="fas fa-wrench"></i></div>
+            <div class="value">234</div>
+            <div class="label">Yêu cầu bảo trì</div>
+        </div>
+        <div class="stat-card alerts">
+            <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="value">12</div>
+            <div class="label">Cảnh báo</div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <a href="/thiet-bi" class="action-btn">
+            <div class="icon"><i class="fas fa-cog"></i></div>
+            <div>Quản lý thiết bị</div>
+        </a>
+        <a href="/bao-tri/yeu-cau" class="action-btn">
+            <div class="icon"><i class="fas fa-wrench"></i></div>
+            <div>Yêu cầu bảo trì</div>
+        </a>
+        <a href="/vat-tu" class="action-btn">
+            <div class="icon"><i class="fas fa-boxes"></i></div>
+            <div>Quản lý vật tư</div>
+        </a>
+        <a href="/bao-cao/tong-hop" class="action-btn">
+            <div class="icon"><i class="fas fa-chart-bar"></i></div>
+            <div>Báo cáo tổng hợp</div>
+        </a>
+        <a href="/nguoi-dung" class="action-btn">
+            <div class="icon"><i class="fas fa-user-cog"></i></div>
+            <div>Quản lý người dùng</div>
+        </a>
+        <a href="/doi-bao-tri" class="action-btn">
+            <div class="icon"><i class="fas fa-users-cog"></i></div>
+            <div>Đội bảo trì</div>
+        </a>
+    </div>
+</div>
+
+<script>
+    // Ẩn success message sau 5 giây
+    setTimeout(() => {
+        const successMsg = document.querySelector('.success-message');
+        if (successMsg) {
+            successMsg.style.animation = 'slideUp 0.5s ease-out forwards';
+            setTimeout(() => successMsg.remove(), 500);
+        }
+    }, 5000);
+
+    // CSS cho slideUp animation
+    const style = document.createElement('style');
+    style.textContent = `
+            @keyframes slideUp {
+                to {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+            }
+        `;
+    document.head.appendChild(style);
+
+    console.log('Dashboard loaded successfully!');
+    console.log('Current user:', '<span th:text="${tenDangNhap}"></span>' || 'admin');
+</script>
+</body>
+</html>

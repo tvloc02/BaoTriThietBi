@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/co-ban}">
+<head>
+    <title>Dashboard - DashStack</title>
+</head>
+
+<div layout:fragment="content">
+    <style>
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+
+        .dashboard-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .stat-card.users::before {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+        }
+        .stat-card.orders::before {
+            background: linear-gradient(135deg, #fdcb6e, #e17055);
+        }
+        .stat-card.revenue::before {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+        }
+        .stat-card.pending::before {
+            background: linear-gradient(135deg, #e84393, #fd79a8);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .stat-icon.users { background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
+        .stat-icon.orders { background: linear-gradient(135deg, #fdcb6e, #e17055); }
+        .stat-icon.revenue { background: linear-gradient(135deg, #00b894, #00cec9); }
+        .stat-icon.pending { background: linear-gradient(135deg, #e84393, #fd79a8); }
+
+        .stat-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+            color: var(--gray-900);
+        }
+
+        .stat-label {
+            color: var(--gray-600);
+            font-weight: 500;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            gap: 0.3rem;
+        }
+
+        .stat-change.positive {
+            color: var(--secondary-color);
+        }
+
+        .stat-change.negative {
+            color: var(--danger-color);
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.6s ease-out 0.5s forwards;
+            opacity: 0;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .chart-filters {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            background: white;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 12px 35px rgba(108, 92, 231, 0.15);
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .action-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .action-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--gray-800);
+        }
+
+        .action-desc {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .recent-activities {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 500;
+            color: var(--gray-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-desc {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+
+            .stat-value {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div>
+            <h1 class="dashboard-title">Dashboard</h1>
+            <p class="dashboard-subtitle">Tổng quan hệ thống quản lý bảo trì thiết bị</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-light">
+                <i class="bi bi-download me-2"></i>Xuất báo cáo
+            </button>
+            <button class="btn btn-light">
+                <i class="bi bi-plus-lg me-2"></i>Tạo yêu cầu
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card users">
+            <div class="stat-header">
+                <div class="stat-icon users">
+                    <i class="bi bi-people"></i>
+                </div>
+            </div>
+            <div class="stat-value" th:text="${totalUsers ?: '40,689'}">40,689</div>
+            <div class="stat-label">Total User</div>
+            <div class="stat-change positive">
+                <i class="bi bi-arrow-up"></i>
+                <span>8.5% Up from yesterday</span>
+            </div>
+        </div>
+
+        <div class="stat-card orders">
+            <div class="stat-header">
+                <div class="stat-icon orders">
+                    <i class="bi bi-box"></i>
+                </div>
+            </div>
+            <div class="stat-value" th:text="${totalOrders ?: '10,293'}">10,293</div>
+            <div class="stat-label">Total Order</div>
+            <div class="stat-change positive">
+                <i class="bi bi-arrow-up"></i>
+                <span>1.3% Up from past week</span>
+            </div>
+        </div>
+
+        <div class="stat-card revenue">
+            <div class="stat-header">
+                <div class="stat-icon revenue">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+            </div>
+            <div class="stat-value" th:text="${totalSales ?: '$89,000'}">$89,000</div>
+            <div class="stat-label">Total Sales</div>
+            <div class="stat-change negative">
+                <i class="bi bi-arrow-down"></i>
+                <span>4.3% Down from yesterday</span>
+            </div>
+        </div>
+
+        <div class="stat-card pending">
+            <div class="stat-header">
+                <div class="stat-icon pending">
+                    <i class="bi bi-clock"></i>
+                </div>
+            </div>
+            <div class="stat-value" th:text="${totalPending ?: '2,040'}">2,040</div>
+            <div class="stat-label">Total Pending</div>
+            <div class="stat-change positive">
+                <i class="bi bi-arrow-up"></i>
+                <span>1.8% Up from yesterday</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Details Chart -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <h3 class="chart-title">Sales Details</h3>
+            <div class="chart-filters">
+                <button class="filter-btn active" data-period="7">7 days</button>
+                <button class="filter-btn" data-period="30">30 days</button>
+                <button class="filter-btn" data-period="90">90 days</button>
+                <button class="filter-btn" data-period="365">1 year</button>
+            </div>
+        </div>
+        <div style="height: 350px; position: relative;">
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-lg-8">
+            <h3 class="mb-3 text-white">Thao tác nhanh</h3>
+            <div class="quick-actions">
+                <a href="/thiet-bi/them" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-plus-circle"></i>
+                    </div>
+                    <div class="action-title">Thêm thiết bị</div>
+                    <div class="action-desc">Đăng ký thiết bị mới vào hệ thống</div>
+                </a>
+
+                <a href="/bao-tri/yeu-cau" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-tools"></i>
+                    </div>
+                    <div class="action-title">Yêu cầu bảo trì</div>
+                    <div class="action-desc">Tạo yêu cầu bảo trì thiết bị</div>
+                </a>
+
+                <a href="/vat-tu/them" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <div class="action-title">Quản lý vật tư</div>
+                    <div class="action-desc">Thêm và quản lý vật tư kho</div>
+                </a>
+
+                <a href="/bao-cao/tong-hop" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <div class="action-title">Xem báo cáo</div>
+                    <div class="action-desc">Phân tích và báo cáo hiệu suất</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="col-lg-4">
+            <h3 class="mb-3 text-white">Hoạt động gần đây</h3>
+            <div class="recent-activities">
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: var(--secondary-color);">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Hoàn thành bảo trì TB001</div>
+                        <div class="activity-desc">Máy nén khí đã được bảo trì thành công</div>
+                        <div class="activity-time">2 phút trước</div>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: var(--warning-color);">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Cảnh báo thiết bị TB045</div>
+                        <div class="activity-desc">Nhiệt độ vượt ngưỡng cho phép</div>
+                        <div class="activity-time">15 phút trước</div>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: var(--primary-color);">
+                        <i class="bi bi-person-plus"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Thêm người dùng mới</div>
+                        <div class="activity-desc">Nguyễn Văn A đã được thêm vào hệ thống</div>
+                        <div class="activity-time">1 giờ trước</div>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: var(--danger-color);">
+                        <i class="bi bi-x-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Từ chối yêu cầu YC123</div>
+                        <div class="activity-desc">Không đủ vật tư để thực hiện</div>
+                        <div class="activity-time">2 giờ trước</div>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: var(--secondary-color);">
+                        <i class="bi bi-plus-square"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Nhập vật tư VT567</div>
+                        <div class="activity-desc">100 đơn vị ốc vít M10 đã được nhập kho</div>
+                        <div class="activity-time">3 giờ trước</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script layout:fragment="scripts">
+    // Sales Chart
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const salesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['0k', '10k', '20k', '30k', '40k', '50k', '60k'],
+            datasets: [{
+                label: 'Sales',
+                data: [25, 45, 35, 64, 45, 55, 65],
+                borderColor: '#6c5ce7',
+                backgroundColor: 'rgba(108, 92, 231, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#6c5ce7',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 3,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: '#6c5ce7',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#64748b',
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#64748b'
+                    }
+                }
+            }
+        }
+    });
+
+    // Filter buttons functionality
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            const period = this.dataset.period;
+            let newData;
+
+            switch(period) {
+                case '7':
+                    newData = [25, 45, 35, 64, 45, 55, 65];
+                    break;
+                case '30':
+                    newData = [20, 35, 55, 45, 65, 75, 85];
+                    break;
+                case '90':
+                    newData = [15, 25, 45, 35, 55, 65, 75];
+                    break;
+                case '365':
+                    newData = [30, 50, 40, 70, 60, 80, 90];
+                    break;
+                default:
+                    newData = [25, 45, 35, 64, 45, 55, 65];
+            }
+
+            salesChart.data.datasets[0].data = newData;
+            salesChart.update('active');
+        });
+    });
+
+    // Auto-refresh dashboard data every 30 seconds
+    setInterval(() => {
+        // Simulate real-time data updates
+        const currentData = salesChart.data.datasets[0].data;
+        const newData = currentData.map(value => {
+            const variation = (Math.random() - 0.5) * 10; // ±5 variation
+            return Math.max(0, Math.min(100, value + variation));
+        });
+
+        salesChart.data.datasets[0].data = newData;
+        salesChart.update('none'); // Update without animation for real-time feel
+    }, 30000);
+
+    // Initialize chart animation
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            document.querySelector('.chart-container').style.opacity = '1';
+        }, 500);
+    });
+</script>
+
+</html>

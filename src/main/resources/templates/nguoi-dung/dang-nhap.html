@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Hệ thống quản lý bảo trì</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .background-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background-image:
+                    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white"/><circle cx="80" cy="40" r="3" fill="white"/><circle cx="40" cy="80" r="1" fill="white"/><circle cx="90" cy="10" r="2" fill="white"/><circle cx="10" cy="90" r="1.5" fill="white"/><circle cx="70" cy="70" r="2.5" fill="white"/></svg>');
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .login-container {
+            display: flex;
+            max-width: 1000px;
+            width: 90%;
+            max-height: 90vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.8s ease-out;
+            margin: 20px;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .left-section {
+            flex: 1;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6, #d946ef);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 40px;
+            min-height: 500px;
+        }
+
+        .left-content {
+            text-align: center;
+            z-index: 2;
+        }
+
+        .left-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .left-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .hero-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .right-section {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-form {
+            max-width: 400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-header h1 {
+            color: #1f2937;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .form-header p {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: white;
+            color: #374151;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .google-btn:hover {
+            border-color: #6366f1;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e5e7eb;
+            z-index: 1;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #9ca3af;
+            padding: 4px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .password-toggle:hover {
+            color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .footer-links a {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: #6366f1;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+                max-width: 90%;
+                margin: 10px;
+                max-height: 95vh;
+            }
+
+            .left-section {
+                min-height: 180px;
+                padding: 25px;
+            }
+
+            .left-content h2 {
+                font-size: 1.6rem;
+            }
+
+            .right-section {
+                padding: 30px 25px;
+            }
+
+            .form-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: floatShapes 15s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: -5s;
+        }
+
+        .shape:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 70%;
+            right: 15%;
+            animation-delay: -10s;
+        }
+
+        .shape:nth-child(3) {
+            width: 40px;
+            height: 40px;
+            top: 40%;
+            right: 30%;
+            animation-delay: -2s;
+        }
+
+        @keyframes floatShapes {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-50px) rotate(180deg);
+                opacity: 0.8;
+            }
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .success-message, .error-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .success-message {
+            background: #10b981;
+            color: white;
+        }
+
+        .error-message {
+            background: #ef4444;
+            color: white;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<div class="background-decoration"></div>
+
+<div class="login-container">
+    <div class="left-section">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        <div class="left-content">
+            <h2>Chào mừng trở lại!</h2>
+            <p>Hệ thống quản lý bảo trì thiết bị công nghiệp hiện đại và thông minh</p>
+        </div>
+        <div class="hero-image">
+            🔧
+        </div>
+    </div>
+
+    <div class="right-section">
+        <form class="login-form" id="loginForm">
+            <div class="form-header">
+                <h1>Đăng nhập</h1>
+                <p>Vui lòng đăng nhập để tiếp tục</p>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                Đăng nhập thành công! Đang chuyển hướng...
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                Tên đăng nhập hoặc mật khẩu không đúng!
+            </div>
+
+            <button type="button" class="google-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Đăng nhập với Google
+            </button>
+
+            <div class="divider">
+                <span>Hoặc</span>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Tên đăng nhập</label>
+                <input type="text" id="username" name="username" class="form-input" placeholder="Nhập tên đăng nhập của bạn" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mật khẩu</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Nhập mật khẩu của bạn" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">Đăng nhập</button>
+
+            <div class="footer-links">
+                <a href="#" onclick="showForgotPassword()">Quên mật khẩu?</a>
+            </div>
+
+            <div class="social-links">
+                <a href="#" class="social-link" title="Email">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                </a>
+                <a href="#" class="social-link" title="Website">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/>
+                        <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                </a>
+                <a href="#" class="social-link" title="Hỗ trợ">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                    </svg>
+                </a>
+                <a href="#" class="social-link" title="LinkedIn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                        <rect x="2" y="9" width="4" height="12"/>
+                        <circle cx="4" cy="4" r="2"/>
+                    </svg>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // API base URL
+    const API_BASE_URL = 'http://localhost:8081/api';
+
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const toggleBtn = document.querySelector('.password-toggle');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+            `;
+        } else {
+            passwordInput.type = 'password';
+            toggleBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            `;
+        }
+    }
+
+    function showForgotPassword() {
+        alert('Tính năng quên mật khẩu sẽ được triển khai sớm!');
+    }
+
+    function showMessage(type, message) {
+        const successMsg = document.getElementById('successMessage');
+        const errorMsg = document.getElementById('errorMessage');
+
+        successMsg.style.display = 'none';
+        errorMsg.style.display = 'none';
+
+        if (type === 'success') {
+            successMsg.textContent = message;
+            successMsg.style.display = 'block';
+        } else {
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+        }
+    }
+
+    function setLoading(isLoading) {
+        const loginBtn = document.getElementById('loginBtn');
+        const form = document.getElementById('loginForm');
+
+        if (isLoading) {
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<span class="spinner"></span> Đang đăng nhập...';
+            form.classList.add('loading');
+        } else {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = 'Đăng nhập';
+            form.classList.remove('loading');
+        }
+    }
+
+    // Xử lý đăng nhập - VERSION FIXED
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+
+        if (!username || !password) {
+            showMessage('error', 'Vui lòng nhập đầy đủ thông tin!');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            console.log('Đang gửi request đến:', `${API_BASE_URL}/auth/dang-nhap`);
+
+            const requestData = {
+                tenDangNhap: username,
+                matKhau: password
+            };
+
+            console.log('Dữ liệu gửi:', requestData);
+
+            const response = await fetch(`${API_BASE_URL}/auth/dang-nhap`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+
+            // Đọc response text trước
+            const responseText = await response.text();
+            console.log('Response text:', responseText);
+
+            let data;
+            if (responseText) {
+                try {
+                    data = JSON.parse(responseText);
+                    console.log('Parsed data:', data);
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    showMessage('error', 'Server trả về dữ liệu không hợp lệ');
+                    return;
+                }
+            } else {
+                console.error('Empty response from server');
+                showMessage('error', 'Server không trả về dữ liệu');
+                return;
+            }
+
+            if (response.ok && data.success) {
+                // ✅ Đăng nhập thành công
+                console.log('Login successful:', data);
+
+                // Lưu token và thông tin người dùng
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                }
+                if (data.nguoiDung) {
+                    localStorage.setItem('nguoiDung', JSON.stringify(data.nguoiDung));
+                }
+
+                showMessage('success', data.message || 'Đăng nhập thành công! Đang chuyển hướng...');
+
+                // Chuyển hướng sau 1.5 giây
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1500);
+
+            } else {
+                // ❌ Đăng nhập thất bại
+                console.log('Login failed:', data);
+                showMessage('error', data.message || 'Đăng nhập thất bại!');
+            }
+
+        } catch (error) {
+            console.error('Network/Connection error:', error);
+
+            // Kiểm tra loại lỗi
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                showMessage('error', 'Không thể kết nối đến server. Vui lòng kiểm tra:\n1. Server đang chạy ở port 8081\n2. Đường dẫn API đúng\n3. Kết nối mạng');
+            } else if (error.name === 'SyntaxError') {
+                showMessage('error', 'Server trả về dữ liệu không đúng định dạng JSON');
+            } else {
+                showMessage('error', `Lỗi: ${error.message}`);
+            }
+        } finally {
+            setLoading(false);
+        }
+    });
+
+    // ✅ Test API connection function
+    async function testConnection() {
+        try {
+            console.log('Testing API connection...');
+            const response = await fetch(`${API_BASE_URL}/auth/test`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('API test successful:', data);
+                return true;
+            } else {
+                console.log('API test failed:', response.status);
+                return false;
+            }
+        } catch (error) {
+            console.error('API test error:', error);
+            return false;
+        }
+    }
+
+    // Test connection khi trang load
+    window.addEventListener('load', async function() {
+        const isConnected = await testConnection();
+        if (!isConnected) {
+            showMessage('error', 'Không thể kết nối đến server. Vui lòng kiểm tra server đang chạy.');
+        }
+
+        checkLogin();
+    });
+
+    // Hiệu ứng particle
+    function createParticle() {
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: particleFloat 8s linear infinite;
+            left: ${Math.random() * 100}%;
+            top: 100%;
+        `;
+
+        document.body.appendChild(particle);
+
+        setTimeout(() => {
+            particle.remove();
+        }, 8000);
+    }
+
+    // Tạo particle mỗi 3 giây
+    setInterval(createParticle, 3000);
+
+    // CSS cho particle animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes particleFloat {
+            to {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        }
+    });
+</script>
+</body>
+</html>
