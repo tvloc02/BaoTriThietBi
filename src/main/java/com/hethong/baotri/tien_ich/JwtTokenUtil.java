@@ -1,8 +1,6 @@
 package com.hethong.baotri.tien_ich;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,41 +18,29 @@ import java.util.function.Function;
 @Slf4j
 public class JwtTokenUtil {
 
-    @Value("${jwt.secret:hethongbaotri-secret-key-for-jwt-token-generation-and-validation}")
-    private String secret;
+    // ✅ SỬA: Tạo secret key đủ mạnh cho HS512
+    private static final String JWT_SECRET = "BaoTriThietBiSecretKeyForHS512AlgorithmMustBeAtLeast512BitsLongToEnsureSecurityAndCompliance2024";
 
-    @Value("${jwt.expiration:86400}") // 24 hours in seconds
-    private Long expiration;
+    @Value("${app.jwt.expiration:86400000}") // 24 hours
+    private int jwtExpiration;
 
-    @Value("${jwt.refresh.expiration:604800}") // 7 days in seconds
-    private Long refreshExpiration;
+    @Value("${app.jwt.refresh-expiration:604800000}") // 7 days
+    private int refreshExpiration;
 
+    // ✅ SỬA: Sử dụng SecretKey thay vì String
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        // Đảm bảo key đủ dài cho HS512 (tối thiểu 64 bytes)
+        String secretKey = JWT_SECRET;
+        if (secretKey.length() < 64) {
+            // Pad với thêm ký tự để đủ 64 bytes
+            secretKey = secretKey + "PaddingTextToEnsure64BytesLengthForHS512AlgorithmCompliance2024";
+        }
+        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername(), expiration * 1000);
-    }
-
-    public String generateRefreshToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("type", "refresh");
-        return createToken(claims, userDetails.getUsername(), refreshExpiration * 1000);
-    }
-
-    private String createToken(Map<String, Object> claims, String subject, Long expiration) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expiration);
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
-                .compact();
+    // ✅ THÊM: Method để tạo secure key tự động (alternative)
+    public static SecretKey generateSecureKey() {
+        return Keys.secretKeyFor(SignatureAlgorithm.HS512);
     }
 
     public String getUsernameFromToken(String token) {
@@ -77,18 +64,42 @@ public class JwtTokenUtil {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
-            log.error("Lỗi khi parse JWT token: {}", e.getMessage());
-            throw new RuntimeException("Token không hợp lệ", e);
+            log.error("Error parsing JWT token: {}", e.getMessage());
+            throw e;
         }
     }
 
-    public Boolean isTokenExpired(String token) {
+    private Boolean isTokenExpired(String token) {
+        final Date expiration = getExpirationDateFromToken(token);
+        return expiration.before(new Date());
+    }
+
+    public String generateToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, userDetails.getUsername(), jwtExpiration);
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "refresh");
+        return createToken(claims, userDetails.getUsername(), refreshExpiration);
+    }
+
+    private String createToken(Map<String, Object> claims, String subject, int expiration) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expiration);
+
         try {
-            final Date expiration = getExpirationDateFromToken(token);
-            return expiration.before(new Date());
+            return Jwts.builder()
+                    .setClaims(claims)
+                    .setSubject(subject)
+                    .setIssuedAt(now)
+                    .setExpiration(expiryDate)
+                    .signWith(getSigningKey(), SignatureAlgorithm.HS512) // ✅ SỬA: Sử dụng SecretKey
+                    .compact();
         } catch (Exception e) {
-            log.error("Lỗi khi kiểm tra token expiration: {}", e.getMessage());
-            return true;
+            log.error("Error creating JWT token: {}", e.getMessage());
+            throw new RuntimeException("Could not create JWT token", e);
         }
     }
 
@@ -96,10 +107,18 @@ public class JwtTokenUtil {
         try {
             final String username = getUsernameFromToken(token);
             return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        } catch (MalformedJwtException e) {
+            log.error("Invalid JWT token: {}", e.getMessage());
+        } catch (ExpiredJwtException e) {
+            log.error("JWT token is expired: {}", e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            log.error("JWT token is unsupported: {}", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.error("JWT claims string is empty: {}", e.getMessage());
         } catch (Exception e) {
-            log.error("Lỗi khi validate token: {}", e.getMessage());
-            return false;
+            log.error("JWT token validation error: {}", e.getMessage());
         }
+        return false;
     }
 
     public Boolean validateToken(String token) {
@@ -108,31 +127,55 @@ public class JwtTokenUtil {
                     .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token);
-            return !isTokenExpired(token);
+            return true;
         } catch (Exception e) {
-            log.error("Token không hợp lệ: {}", e.getMessage());
+            log.debug("JWT token validation failed: {}", e.getMessage());
             return false;
         }
     }
 
-    public Long getExpirationTime() {
-        return expiration;
-    }
-
-    public Long getRefreshExpirationTime() {
-        return refreshExpiration;
-    }
-
-    public String getTokenType(String token) {
+    public String refreshToken(String token) {
         try {
             Claims claims = getAllClaimsFromToken(token);
-            return claims.get("type", String.class);
+            String username = claims.getSubject();
+
+            // Tạo token mới với thời gian expire mới
+            Map<String, Object> newClaims = new HashMap<>();
+            return createToken(newClaims, username, jwtExpiration);
+
         } catch (Exception e) {
-            return "access";
+            log.error("Error refreshing token: {}", e.getMessage());
+            throw new RuntimeException("Could not refresh token", e);
         }
     }
 
-    public boolean isRefreshToken(String token) {
-        return "refresh".equals(getTokenType(token));
+    // ✅ THÊM: Getter methods for configuration
+    public int getExpirationTime() {
+        return jwtExpiration;
+    }
+
+    public int getRefreshExpirationTime() {
+        return refreshExpiration;
+    }
+
+    // ✅ THÊM: Method để kiểm tra token type
+    public String getTokenType(String token) {
+        try {
+            Claims claims = getAllClaimsFromToken(token);
+            return (String) claims.get("type");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // ✅ THÊM: Method để extract custom claims
+    public Object getCustomClaim(String token, String claimName) {
+        try {
+            Claims claims = getAllClaimsFromToken(token);
+            return claims.get(claimName);
+        } catch (Exception e) {
+            log.debug("Could not extract claim '{}' from token: {}", claimName, e.getMessage());
+            return null;
+        }
     }
 }

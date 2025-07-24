@@ -1,298 +1,410 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - DashStack</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <title>🔍 Debug Dashboard Access</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .welcome h1 {
-            color: #667eea;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .welcome p {
-            color: #666;
-            font-size: 1.1rem;
-        }
-
-        .user-info {
-            text-align: right;
-        }
-
-        .user-info .username {
-            font-weight: 600;
-            color: #333;
-            font-size: 1.1rem;
-        }
-
-        .user-info .role {
-            color: #667eea;
-            font-size: 0.9rem;
-            margin-top: 0.25rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-card .icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .stat-card.users .icon { color: #667eea; }
-        .stat-card.devices .icon { color: #f093fb; }
-        .stat-card.maintenance .icon { color: #4facfe; }
-        .stat-card.alerts .icon { color: #43e97b; }
-
-        .stat-card .value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-card .label {
-            color: #666;
-            font-size: 1rem;
-        }
-
-        .actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-
-        .action-btn {
-            background: rgba(255, 255, 255, 0.95);
-            border: none;
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-decoration: none;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .action-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
-            text-decoration: none;
-            color: #667eea;
-        }
-
-        .action-btn .icon {
-            font-size: 1.5rem;
-            color: #667eea;
-        }
-
-        .logout-btn {
-            position: fixed;
-            top: 2rem;
-            right: 2rem;
-            background: #ff6b6b;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 0.75rem 1.5rem;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
-        }
-
-        .logout-btn:hover {
-            background: #ff5252;
-            transform: translateY(-2px);
-            color: white;
-            text-decoration: none;
-        }
-
-        .success-message {
-            background: #4caf50;
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            text-align: center;
-            animation: slideDown 0.5s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container { padding: 1rem; }
-            .header { flex-direction: column; text-align: center; gap: 1rem; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .actions { grid-template-columns: 1fr; }
-            .logout-btn { position: relative; top: 0; right: 0; margin: 1rem auto; }
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .test-btn { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .test-btn:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 5px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; width: 200px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .status { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .status.ok { background: #28a745; color: white; }
+        .status.fail { background: #dc3545; color: white; }
+        .status.pending { background: #ffc107; color: black; }
     </style>
 </head>
 <body>
-<a href="/logout" class="logout-btn">
-    <i class="fas fa-sign-out-alt"></i>
-    Đăng xuất
-</a>
-
 <div class="container">
-    <div class="success-message">
-        <i class="fas fa-check-circle"></i>
-        Đăng nhập thành công! Chào mừng đến với hệ thống quản lý bảo trì thiết bị.
-    </div>
+    <h1>🔍 Debug Dashboard Access - Complete Flow</h1>
 
-    <div class="header">
-        <div class="welcome">
-            <h1><i class="fas fa-cogs"></i> DashStack</h1>
-            <p>Hệ thống quản lý bảo trì thiết bị công nghiệp</p>
-        </div>
-        <div class="user-info">
-            <div class="username">
-                <i class="fas fa-user"></i>
-                <span th:text="${tenDangNhap ?: 'admin'}">admin</span>
-            </div>
-            <div class="role">
-                <span th:text="${authorities ?: 'ROLE_ADMIN'}">ROLE_ADMIN</span>
-            </div>
+    <div class="section">
+        <h3>📊 System Status</h3>
+        <div id="systemStatus">
+            <span class="status pending">Checking...</span>
         </div>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-card users">
-            <div class="icon"><i class="fas fa-users"></i></div>
-            <div class="value">1,245</div>
-            <div class="label">Người dùng</div>
+    <div class="grid">
+        <div class="section">
+            <h3>🔗 1. API Tests</h3>
+            <button class="test-btn" onclick="testAPIConnection()">Test API Connection</button>
+            <button class="test-btn" onclick="testDatabaseConnection()">Test Database</button>
+            <div id="apiResults" class="result"></div>
         </div>
-        <div class="stat-card devices">
-            <div class="icon"><i class="fas fa-cogs"></i></div>
-            <div class="value">856</div>
-            <div class="label">Thiết bị</div>
-        </div>
-        <div class="stat-card maintenance">
-            <div class="icon"><i class="fas fa-wrench"></i></div>
-            <div class="value">234</div>
-            <div class="label">Yêu cầu bảo trì</div>
-        </div>
-        <div class="stat-card alerts">
-            <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <div class="value">12</div>
-            <div class="label">Cảnh báo</div>
+
+        <div class="section">
+            <h3>🔐 2. Authentication Test</h3>
+            <input type="text" id="username" value="admin" placeholder="Username">
+            <input type="password" id="password" value="123456" placeholder="Password"><br>
+            <button class="test-btn" onclick="testLogin()">Test Login API</button>
+            <button class="test-btn" onclick="testFormLogin()">Test Form Login</button>
+            <div id="authResults" class="result"></div>
         </div>
     </div>
 
-    <div class="actions">
-        <a href="/thiet-bi" class="action-btn">
-            <div class="icon"><i class="fas fa-cog"></i></div>
-            <div>Quản lý thiết bị</div>
-        </a>
-        <a href="/bao-tri/yeu-cau" class="action-btn">
-            <div class="icon"><i class="fas fa-wrench"></i></div>
-            <div>Yêu cầu bảo trì</div>
-        </a>
-        <a href="/vat-tu" class="action-btn">
-            <div class="icon"><i class="fas fa-boxes"></i></div>
-            <div>Quản lý vật tư</div>
-        </a>
-        <a href="/bao-cao/tong-hop" class="action-btn">
-            <div class="icon"><i class="fas fa-chart-bar"></i></div>
-            <div>Báo cáo tổng hợp</div>
-        </a>
-        <a href="/nguoi-dung" class="action-btn">
-            <div class="icon"><i class="fas fa-user-cog"></i></div>
-            <div>Quản lý người dùng</div>
-        </a>
-        <a href="/doi-bao-tri" class="action-btn">
-            <div class="icon"><i class="fas fa-users-cog"></i></div>
-            <div>Đội bảo trì</div>
-        </a>
+    <div class="section">
+        <h3>🏠 3. Dashboard Access Tests</h3>
+        <button class="test-btn" onclick="testDashboardDirect()">Direct Dashboard Access</button>
+        <button class="test-btn" onclick="testDashboardWithToken()">Dashboard with Token</button>
+        <button class="test-btn" onclick="testDashboardRedirect()">Test Auto Redirect</button>
+        <div id="dashboardResults" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h3>🛠️ 4. Fix Attempts</h3>
+        <button class="test-btn" onclick="createTestUser()">Create Test User</button>
+        <button class="test-btn" onclick="clearAllData()">Clear All Data</button>
+        <button class="test-btn" onclick="simulateFormLogin()">Simulate Form Login</button>
+        <div id="fixResults" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h3>📋 5. Current State</h3>
+        <button class="test-btn" onclick="showCurrentState()">Show Current State</button>
+        <div id="stateResults" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h3>🚀 6. Quick Actions</h3>
+        <button class="test-btn" onclick="runFullDiagnostic()">Run Full Diagnostic</button>
+        <button class="test-btn" onclick="window.open('/login', '_blank')">Open Login Page</button>
+        <button class="test-btn" onclick="window.open('/dashboard', '_blank')">Try Dashboard</button>
     </div>
 </div>
 
 <script>
-    // Ẩn success message sau 5 giây
-    setTimeout(() => {
-        const successMsg = document.querySelector('.success-message');
-        if (successMsg) {
-            successMsg.style.animation = 'slideUp 0.5s ease-out forwards';
-            setTimeout(() => successMsg.remove(), 500);
+    const API_BASE = window.location.origin + '/api';
+
+    function log(message, type = 'info', elementId = null) {
+        console.log(message);
+        if (elementId) {
+            const element = document.getElementById(elementId);
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            element.appendChild(div);
+            element.scrollTop = element.scrollHeight;
         }
-    }, 5000);
+    }
 
-    // CSS cho slideUp animation
-    const style = document.createElement('style');
-    style.textContent = `
-            @keyframes slideUp {
-                to {
-                    opacity: 0;
-                    transform: translateY(-20px);
-                }
+    function clearResults(elementId) {
+        document.getElementById(elementId).innerHTML = '';
+    }
+
+    async function testAPIConnection() {
+        clearResults('apiResults');
+        log('Testing API connection...', 'info', 'apiResults');
+
+        try {
+            const response = await fetch(`${API_BASE}/auth/test`);
+            if (response.ok) {
+                const data = await response.json();
+                log(`✅ API OK: ${JSON.stringify(data)}`, 'success', 'apiResults');
+                return true;
+            } else {
+                log(`❌ API Failed: ${response.status}`, 'error', 'apiResults');
+                return false;
             }
-        `;
-    document.head.appendChild(style);
+        } catch (error) {
+            log(`💥 API Error: ${error.message}`, 'error', 'apiResults');
+            return false;
+        }
+    }
 
-    console.log('Dashboard loaded successfully!');
-    console.log('Current user:', '<span th:text="${tenDangNhap}"></span>' || 'admin');
+    async function testDatabaseConnection() {
+        log('Testing database connection...', 'info', 'apiResults');
+
+        try {
+            const response = await fetch(`${API_BASE}/debug/test-database`);
+            if (response.ok) {
+                const data = await response.json();
+                log(`✅ Database OK: ${data.totalUsers} users found`, 'success', 'apiResults');
+                return true;
+            } else {
+                log(`❌ Database Failed: ${response.status}`, 'error', 'apiResults');
+                return false;
+            }
+        } catch (error) {
+            log(`💥 Database Error: ${error.message}`, 'error', 'apiResults');
+            return false;
+        }
+    }
+
+    async function testLogin() {
+        clearResults('authResults');
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        log(`Testing login API for: ${username}`, 'info', 'authResults');
+
+        try {
+            const response = await fetch(`${API_BASE}/auth/dang-nhap`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    tenDangNhap: username,
+                    matKhau: password
+                })
+            });
+
+            const responseText = await response.text();
+            log(`Response: ${responseText}`, 'info', 'authResults');
+
+            if (response.ok) {
+                const data = JSON.parse(responseText);
+                if (data.success) {
+                    log('✅ Login API Success!', 'success', 'authResults');
+
+                    // Save token
+                    if (data.token) {
+                        localStorage.setItem('token', data.token);
+                        log('💾 Token saved to localStorage', 'success', 'authResults');
+                    }
+
+                    return data;
+                } else {
+                    log(`❌ Login failed: ${data.message}`, 'error', 'authResults');
+                    return null;
+                }
+            } else {
+                log(`❌ Login request failed: ${response.status}`, 'error', 'authResults');
+                return null;
+            }
+        } catch (error) {
+            log(`💥 Login error: ${error.message}`, 'error', 'authResults');
+            return null;
+        }
+    }
+
+    async function testFormLogin() {
+        log('Testing form-based login...', 'info', 'authResults');
+
+        try {
+            // Create a hidden form for form-based login
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/perform-login';
+            form.style.display = 'none';
+            form.target = '_blank';
+
+            const usernameInput = document.createElement('input');
+            usernameInput.name = 'username';
+            usernameInput.value = document.getElementById('username').value;
+            form.appendChild(usernameInput);
+
+            const passwordInput = document.createElement('input');
+            passwordInput.name = 'password';
+            passwordInput.value = document.getElementById('password').value;
+            form.appendChild(passwordInput);
+
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+
+            log('✅ Form login submitted - check new tab', 'success', 'authResults');
+        } catch (error) {
+            log(`💥 Form login error: ${error.message}`, 'error', 'authResults');
+        }
+    }
+
+    async function testDashboardDirect() {
+        clearResults('dashboardResults');
+        log('Testing direct dashboard access...', 'info', 'dashboardResults');
+
+        try {
+            const response = await fetch('/dashboard', {
+                method: 'GET',
+                credentials: 'same-origin'
+            });
+
+            log(`Dashboard response: ${response.status} ${response.statusText}`, 'info', 'dashboardResults');
+
+            if (response.ok) {
+                log('✅ Dashboard accessible', 'success', 'dashboardResults');
+                return true;
+            } else if (response.status === 302 || response.status === 301) {
+                const location = response.headers.get('Location');
+                log(`🔄 Dashboard redirected to: ${location}`, 'warning', 'dashboardResults');
+                return false;
+            } else {
+                log(`❌ Dashboard access denied: ${response.status}`, 'error', 'dashboardResults');
+                return false;
+            }
+        } catch (error) {
+            log(`💥 Dashboard error: ${error.message}`, 'error', 'dashboardResults');
+            return false;
+        }
+    }
+
+    async function testDashboardWithToken() {
+        log('Testing dashboard with stored token...', 'info', 'dashboardResults');
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            log('❌ No token found in localStorage', 'error', 'dashboardResults');
+            return false;
+        }
+
+        try {
+            const response = await fetch('/dashboard', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                credentials: 'same-origin'
+            });
+
+            if (response.ok) {
+                log('✅ Dashboard accessible with token', 'success', 'dashboardResults');
+                return true;
+            } else {
+                log(`❌ Dashboard denied even with token: ${response.status}`, 'error', 'dashboardResults');
+                return false;
+            }
+        } catch (error) {
+            log(`💥 Token dashboard error: ${error.message}`, 'error', 'dashboardResults');
+            return false;
+        }
+    }
+
+    function testDashboardRedirect() {
+        log('Testing dashboard redirect in new tab...', 'info', 'dashboardResults');
+        window.open('/dashboard', '_blank');
+        log('✅ Dashboard opened in new tab - check manually', 'success', 'dashboardResults');
+    }
+
+    async function createTestUser() {
+        clearResults('fixResults');
+        log('Creating test user...', 'info', 'fixResults');
+
+        try {
+            const response = await fetch(`${API_BASE}/debug/create-test-user`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                log(`✅ ${data.message}`, 'success', 'fixResults');
+            } else {
+                log(`❌ Create user failed: ${response.status}`, 'error', 'fixResults');
+            }
+        } catch (error) {
+            log(`💥 Create user error: ${error.message}`, 'error', 'fixResults');
+        }
+    }
+
+    function clearAllData() {
+        localStorage.clear();
+        sessionStorage.clear();
+        log('🗑️ All browser data cleared', 'info', 'fixResults');
+    }
+
+    async function simulateFormLogin() {
+        log('Simulating form login with redirect...', 'info', 'fixResults');
+
+        // First login via API
+        const loginResult = await testLogin();
+
+        if (loginResult && loginResult.success) {
+            log('API login successful, now redirecting...', 'success', 'fixResults');
+
+            // Wait a bit then redirect
+            setTimeout(() => {
+                log('Redirecting to dashboard...', 'info', 'fixResults');
+                window.location.href = '/dashboard';
+            }, 1000);
+        } else {
+            log('❌ Cannot simulate - API login failed', 'error', 'fixResults');
+        }
+    }
+
+    function showCurrentState() {
+        clearResults('stateResults');
+
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('nguoiDung');
+        const currentUrl = window.location.href;
+
+        log(`Current URL: ${currentUrl}`, 'info', 'stateResults');
+        log(`Token in localStorage: ${token ? 'YES' : 'NO'}`, token ? 'success' : 'error', 'stateResults');
+        log(`User data in localStorage: ${userData ? 'YES' : 'NO'}`, userData ? 'success' : 'error', 'stateResults');
+
+        if (token) {
+            log(`Token preview: ${token.substring(0, 50)}...`, 'info', 'stateResults');
+        }
+
+        if (userData) {
+            try {
+                const user = JSON.parse(userData);
+                log(`User: ${user.tenDangNhap || 'unknown'}`, 'info', 'stateResults');
+            } catch (e) {
+                log('❌ Invalid user data in localStorage', 'error', 'stateResults');
+            }
+        }
+    }
+
+    async function runFullDiagnostic() {
+        document.getElementById('systemStatus').innerHTML = '<span class="status pending">Running diagnostic...</span>';
+
+        // Clear all results
+        ['apiResults', 'authResults', 'dashboardResults', 'fixResults', 'stateResults'].forEach(clearResults);
+
+        let allPassed = true;
+
+        // Step 1: API
+        log('=== STEP 1: API CONNECTION ===', 'info', 'apiResults');
+        const apiOk = await testAPIConnection();
+        const dbOk = await testDatabaseConnection();
+
+        if (!apiOk || !dbOk) {
+            allPassed = false;
+            log('❌ Basic connectivity failed', 'error', 'apiResults');
+        }
+
+        // Step 2: Auth
+        log('=== STEP 2: AUTHENTICATION ===', 'info', 'authResults');
+        const loginResult = await testLogin();
+
+        if (!loginResult) {
+            allPassed = false;
+            log('❌ Authentication failed', 'error', 'authResults');
+        }
+
+        // Step 3: Dashboard
+        log('=== STEP 3: DASHBOARD ACCESS ===', 'info', 'dashboardResults');
+        const dashboardOk = await testDashboardDirect();
+
+        if (!dashboardOk) {
+            allPassed = false;
+            log('❌ Dashboard access failed', 'error', 'dashboardResults');
+        }
+
+        // Final status
+        const statusElement = document.getElementById('systemStatus');
+        if (allPassed) {
+            statusElement.innerHTML = '<span class="status ok">All systems OK</span>';
+            log('🎉 All tests passed! Try logging in now.', 'success', 'fixResults');
+        } else {
+            statusElement.innerHTML = '<span class="status fail">Issues detected</span>';
+            log('⚠️ Some tests failed. Check individual results above.', 'warning', 'fixResults');
+        }
+    }
+
+    // Auto-run diagnostic on load
+    window.addEventListener('load', function() {
+        setTimeout(runFullDiagnostic, 1000);
+    });
 </script>
 </body>
 </html>

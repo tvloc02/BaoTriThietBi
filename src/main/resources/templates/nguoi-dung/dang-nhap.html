@@ -535,8 +535,8 @@
 </div>
 
 <script>
-    // API base URL
-    const API_BASE_URL = 'http://localhost:8081/api';
+    // ✅ API base URL với port đúng
+    const API_BASE_URL = window.location.origin + '/api';
 
     function togglePassword() {
         const passwordInput = document.getElementById('password');
@@ -596,12 +596,15 @@
         }
     }
 
-    // Xử lý đăng nhập - VERSION FIXED
+    // ✅ Xử lý đăng nhập - SIMPLE VERSION
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
+
+        console.log('🚀 Starting login process...');
+        console.log('📝 Username:', username);
 
         if (!username || !password) {
             showMessage('error', 'Vui lòng nhập đầy đủ thông tin!');
@@ -611,16 +614,17 @@
         setLoading(true);
 
         try {
-            console.log('Đang gửi request đến:', `${API_BASE_URL}/auth/dang-nhap`);
+            const apiUrl = `${API_BASE_URL}/auth/dang-nhap`;
+            console.log('📡 API URL:', apiUrl);
 
             const requestData = {
                 tenDangNhap: username,
                 matKhau: password
             };
 
-            console.log('Dữ liệu gửi:', requestData);
+            console.log('📤 Request data:', requestData);
 
-            const response = await fetch(`${API_BASE_URL}/auth/dang-nhap`, {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -629,146 +633,94 @@
                 body: JSON.stringify(requestData)
             });
 
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
+            console.log('📥 Response status:', response.status);
+            console.log('📥 Response headers:', response.headers);
 
-            // Đọc response text trước
             const responseText = await response.text();
-            console.log('Response text:', responseText);
+            console.log('📄 Response text:', responseText);
+
+            if (!responseText) {
+                throw new Error('Empty response from server');
+            }
 
             let data;
-            if (responseText) {
-                try {
-                    data = JSON.parse(responseText);
-                    console.log('Parsed data:', data);
-                } catch (parseError) {
-                    console.error('JSON parse error:', parseError);
-                    showMessage('error', 'Server trả về dữ liệu không hợp lệ');
-                    return;
-                }
-            } else {
-                console.error('Empty response from server');
-                showMessage('error', 'Server không trả về dữ liệu');
-                return;
+            try {
+                data = JSON.parse(responseText);
+                console.log('✅ Parsed JSON:', data);
+            } catch (parseError) {
+                console.error('❌ JSON parse error:', parseError);
+                throw new Error(`Invalid JSON response: ${responseText}`);
             }
 
             if (response.ok && data.success) {
-                // ✅ Đăng nhập thành công
-                console.log('Login successful:', data);
+                console.log('🎉 Login successful!');
 
-                // Lưu token và thông tin người dùng
+                // Save token
                 if (data.token) {
                     localStorage.setItem('token', data.token);
+                    console.log('💾 Token saved');
                 }
+
                 if (data.nguoiDung) {
                     localStorage.setItem('nguoiDung', JSON.stringify(data.nguoiDung));
+                    console.log('💾 User data saved');
                 }
 
-                showMessage('success', data.message || 'Đăng nhập thành công! Đang chuyển hướng...');
+                showMessage('success', 'Đăng nhập thành công! Đang chuyển hướng...');
 
-                // Chuyển hướng sau 1.5 giây
+                // Simple redirect
                 setTimeout(() => {
+                    console.log('🔄 Redirecting to dashboard...');
                     window.location.href = '/dashboard';
-                }, 1500);
+                }, 1000);
 
             } else {
-                // ❌ Đăng nhập thất bại
-                console.log('Login failed:', data);
-                showMessage('error', data.message || 'Đăng nhập thất bại!');
+                console.log('❌ Login failed:', data);
+                throw new Error(data.message || 'Đăng nhập thất bại!');
             }
 
         } catch (error) {
-            console.error('Network/Connection error:', error);
-
-            // Kiểm tra loại lỗi
-            if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                showMessage('error', 'Không thể kết nối đến server. Vui lòng kiểm tra:\n1. Server đang chạy ở port 8081\n2. Đường dẫn API đúng\n3. Kết nối mạng');
-            } else if (error.name === 'SyntaxError') {
-                showMessage('error', 'Server trả về dữ liệu không đúng định dạng JSON');
-            } else {
-                showMessage('error', `Lỗi: ${error.message}`);
-            }
+            console.error('💥 Login error:', error);
+            showMessage('error', error.message || 'Đã xảy ra lỗi khi đăng nhập');
         } finally {
             setLoading(false);
         }
     });
 
-    // ✅ Test API connection function
-    async function testConnection() {
-        try {
-            console.log('Testing API connection...');
-            const response = await fetch(`${API_BASE_URL}/auth/test`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
+    // ✅ Test connection on load
+    window.addEventListener('load', async function() {
+        console.log('🚀 Page loaded');
 
+        // Auto-fill for testing
+        if (window.location.hostname === 'localhost') {
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = '123456';
+            console.log('🔧 Auto-filled for testing');
+        }
+
+        // Test API connection
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/test`);
             if (response.ok) {
                 const data = await response.json();
-                console.log('API test successful:', data);
-                return true;
+                console.log('✅ API connection OK:', data);
             } else {
-                console.log('API test failed:', response.status);
-                return false;
+                console.log('⚠️ API connection failed:', response.status);
+                showMessage('error', 'Không thể kết nối tới server');
             }
         } catch (error) {
-            console.error('API test error:', error);
-            return false;
+            console.error('💥 Connection test failed:', error);
+            showMessage('error', 'Không thể kết nối tới server. Vui lòng kiểm tra server đang chạy.');
         }
-    }
-
-    // Test connection khi trang load
-    window.addEventListener('load', async function() {
-        const isConnected = await testConnection();
-        if (!isConnected) {
-            showMessage('error', 'Không thể kết nối đến server. Vui lòng kiểm tra server đang chạy.');
-        }
-
-        checkLogin();
     });
 
-    // Hiệu ứng particle
-    function createParticle() {
-        const particle = document.createElement('div');
-        particle.style.cssText = `
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-            animation: particleFloat 8s linear infinite;
-            left: ${Math.random() * 100}%;
-            top: 100%;
-        `;
-
-        document.body.appendChild(particle);
-
-        setTimeout(() => {
-            particle.remove();
-        }, 8000);
-    }
-
-    // Tạo particle mỗi 3 giây
-    setInterval(createParticle, 3000);
-
-    // CSS cho particle animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes particleFloat {
-            to {
-                transform: translateY(-100vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
-    `;
-    document.head.appendChild(style);
-
-    // Keyboard shortcuts
+    // Quick login shortcut
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+            e.preventDefault();
+            console.log('⚡ Quick login triggered');
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = '123456';
             document.getElementById('loginForm').dispatchEvent(new Event('submit'));
         }
     });
