@@ -1,48 +1,47 @@
 package com.hethong.baotri.cau_hinh;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.http.HttpServletRequest;
-
-@Controller
 @ControllerAdvice
 @Slf4j
-public class GlobalExceptionHandler implements ErrorController {
+public class GlobalExceptionHandler {
 
-    @RequestMapping("/error")
-    public String handleError(HttpServletRequest request, Model model) {
-        Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-        Object message = request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleNotFound(NoHandlerFoundException ex, Model model) {
+        String requestUrl = ex.getRequestURL();
 
-        if (status != null) {
-            Integer statusCode = Integer.valueOf(status.toString());
-            log.error("Error {} occurred: {}", statusCode, message);
-
-            model.addAttribute("statusCode", statusCode);
-            model.addAttribute("message", message);
-
-            // ✅ Sử dụng trang lỗi có sẵn thay vì template không tồn tại
+        // ✅ Bỏ qua favicon và static resources
+        if (requestUrl.contains("favicon.ico") ||
+                requestUrl.contains("/css/") ||
+                requestUrl.contains("/js/") ||
+                requestUrl.contains("/images/")) {
+            log.debug("🔇 Ignoring static resource: {}", requestUrl);
             return "error/404";
         }
 
+        log.warn("🚫 404 Not Found: {}", requestUrl);
+        model.addAttribute("errorMessage", "Trang không tồn tại: " + requestUrl);
+        model.addAttribute("requestUrl", requestUrl);
         return "error/404";
     }
 
     @ExceptionHandler(Exception.class)
-    public String handleGenericException(Exception e, Model model) {
-        log.error("Unexpected error occurred", e);
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public String handleGenericException(Exception ex, Model model) {
+        // ✅ Không log cho favicon
+        if (!ex.getMessage().contains("favicon")) {
+            log.error("❌ Unexpected error occurred", ex);
+        }
 
         model.addAttribute("errorMessage", "Đã xảy ra lỗi không mong muốn");
-
-        // ✅ Sử dụng trang lỗi đơn giản
+        model.addAttribute("errorDetails", ex.getMessage());
         return "error/404";
     }
 }

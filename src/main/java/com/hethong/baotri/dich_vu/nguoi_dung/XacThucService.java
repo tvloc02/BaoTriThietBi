@@ -7,7 +7,6 @@ import com.hethong.baotri.ngoai_le.NgoaiLeNguoiDung;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -33,9 +32,12 @@ public class XacThucService {
     private final NguoiDungRepository nguoiDungRepository;
     private final JwtTokenUtil jwtTokenUtil;
     private final PasswordEncoder passwordEncoder;
-    private final CustomUserDetailsService userDetailsService; // ✅ THÊM
+    private final CustomUserDetailsService userDetailsService;
 
-    private AuthenticationManager authenticationManager; // ✅ SỬA: Không inject qua constructor
+    // ✅ Lazy injection để tránh circular dependency
+    @Autowired
+    @Lazy
+    private AuthenticationManager authenticationManager;
 
     public XacThucService(NguoiDungRepository nguoiDungRepository,
                           JwtTokenUtil jwtTokenUtil,
@@ -47,38 +49,33 @@ public class XacThucService {
         this.userDetailsService = userDetailsService;
     }
 
-    @Autowired
-    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
-    }
-
     public Map<String, Object> dangNhap(String tenDangNhap, String matKhau) {
         log.info("Đang xử lý đăng nhập cho: {}", tenDangNhap);
 
         try {
-            // ✅ SỬA: Kiểm tra user exists trước
+            // ✅ Kiểm tra user exists trước
             NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhap(tenDangNhap)
                     .orElseThrow(() -> new BadCredentialsException("Tên đăng nhập không tồn tại"));
 
             log.debug("Found user: {}", nguoiDung.getTenDangNhap());
-            log.debug("User enabled: {}", nguoiDung.isEnabled());
-            log.debug("Account non-locked: {}", nguoiDung.isAccountNonLocked());
-            log.debug("Stored password: {}", nguoiDung.getMatKhau());
 
-            // ✅ SỬA: Kiểm tra password trực tiếp trước
+            // ✅ Kiểm tra password trực tiếp trước
             if (!passwordEncoder.matches(matKhau, nguoiDung.getMatKhau())) {
                 log.warn("Password mismatch for user: {}", tenDangNhap);
                 xuLyDangNhapThatBaiTrucTiep(tenDangNhap);
                 throw new BadCredentialsException("Mật khẩu không đúng");
             }
 
-            // Authentication với Spring Security
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(tenDangNhap, matKhau)
-            );
+            // ✅ Chỉ authentication khi authenticationManager có sẵn
+            Authentication authentication = null;
+            if (authenticationManager != null) {
+                authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(tenDangNhap, matKhau)
+                );
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            UserDetails userDetails = userDetailsService.loadUserByUsername(tenDangNhap);
 
             // Tạo JWT token
             String accessToken = jwtTokenUtil.generateToken(userDetails);
@@ -88,7 +85,7 @@ public class XacThucService {
             capNhatLanDangNhapCuoiTrucTiep(tenDangNhap);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("success", true); // ✅ THÊM
+            response.put("success", true);
             response.put("accessToken", accessToken);
             response.put("refreshToken", refreshToken);
             response.put("tokenType", "Bearer");

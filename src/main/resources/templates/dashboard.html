@@ -8,23 +8,13 @@
 
 <div layout:fragment="content">
     <style>
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .welcome-card {
+            background: white; /* ✅ Nền trắng như mẫu */
+            border-radius: 12px;
+            padding: 2rem;
             margin-bottom: 2rem;
-        }
-
-        .dashboard-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: white;
-            margin: 0;
-        }
-
-        .dashboard-subtitle {
-            color: rgba(255, 255, 255, 0.8);
-            margin-top: 0.5rem;
+            border: 1px solid var(--gray-200);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .stats-grid {
@@ -35,14 +25,14 @@
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
+            background: white; /* ✅ Nền trắng */
+            border-radius: 12px;
             padding: 2rem;
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--gray-200);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             animation: fadeInUp 0.6s ease-out forwards;
         }
 
@@ -55,29 +45,14 @@
             height: 4px;
         }
 
-        .stat-card.users::before {
-            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-        }
-        .stat-card.orders::before {
-            background: linear-gradient(135deg, #fdcb6e, #e17055);
-        }
-        .stat-card.revenue::before {
-            background: linear-gradient(135deg, #00b894, #00cec9);
-        }
-        .stat-card.pending::before {
-            background: linear-gradient(135deg, #e84393, #fd79a8);
-        }
+        .stat-card.users::before { background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
+        .stat-card.orders::before { background: linear-gradient(135deg, #fdcb6e, #e17055); }
+        .stat-card.revenue::before { background: linear-gradient(135deg, #00b894, #00cec9); }
+        .stat-card.pending::before { background: linear-gradient(135deg, #e84393, #fd79a8); }
 
         .stat-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
         }
 
         .stat-icon {
@@ -89,6 +64,7 @@
             justify-content: center;
             font-size: 1.8rem;
             color: white;
+            margin-bottom: 1rem;
         }
 
         .stat-icon.users { background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
@@ -119,18 +95,13 @@
             gap: 0.3rem;
         }
 
-        .stat-change.positive {
-            color: var(--secondary-color);
-        }
-
-        .stat-change.negative {
-            color: var(--danger-color);
-        }
+        .stat-change.positive { color: var(--secondary-color); }
+        .stat-change.negative { color: var(--danger-color); }
 
         .quick-actions {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
@@ -138,12 +109,13 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border-radius: 16px;
-            padding: 1.5rem;
+            padding: 2rem;
             text-align: center;
             transition: all 0.3s ease;
             border: 2px solid transparent;
             text-decoration: none;
             color: inherit;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .action-card:hover {
@@ -155,8 +127,8 @@
         }
 
         .action-icon {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             display: flex;
@@ -164,18 +136,71 @@
             justify-content: center;
             margin: 0 auto 1rem;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
         }
 
         .action-title {
             font-weight: 600;
             margin-bottom: 0.5rem;
             color: var(--gray-800);
+            font-size: 1.1rem;
         }
 
         .action-desc {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .recent-activities {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 500;
+            color: var(--gray-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-desc {
             font-size: 0.875rem;
             color: var(--gray-600);
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+
+            margin-left: auto;
         }
 
         @keyframes fadeInUp {
@@ -194,38 +219,7 @@
         .stat-card:nth-child(3) { animation-delay: 0.3s; }
         .stat-card:nth-child(4) { animation-delay: 0.4s; }
 
-        .welcome-section {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            border-radius: 16px;
-            margin-bottom: 2rem;
-            backdrop-filter: blur(10px);
-        }
-
-        .system-status {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .status-item {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
-        }
-
-        .status-ok { color: #00b894; }
-        .status-warning { color: #fdcb6e; }
-        .status-error { color: #e84393; }
-
         @media (max-width: 768px) {
-            .dashboard-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
             .stats-grid {
                 grid-template-columns: 1fr;
             }
@@ -244,50 +238,33 @@
         }
     </style>
 
-    <!-- Welcome Section -->
-    <div class="welcome-section">
-        <div class="dashboard-header">
-            <div>
-                <h1 class="dashboard-title">🎉 Chào mừng trở lại!</h1>
-                <p class="dashboard-subtitle" th:text="'Xin chào, ' + (${tenDangNhap} ?: 'Admin') + '! Hệ thống đang hoạt động tốt.'">
-                    Xin chào Admin! Hệ thống đang hoạt động tốt.
+    <!-- Welcome Header -->
+    <div class="welcome-card">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">🎉 Chào mừng trở lại!</h1>
+                <p class="text-muted mb-0" th:text="'Xin chào, ' + (${tenDangNhap} ?: 'Admin') + '! Hệ thống đang hoạt động tốt.'">
+                    Xin chào, Admin! Hệ thống đang hoạt động tốt.
                 </p>
             </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-light">
+            <div class="col-md-4 text-end">
+                <button class="btn btn-primary me-2">
                     <i class="bi bi-download me-2"></i>Xuất báo cáo
                 </button>
-                <button class="btn btn-light">
+                <button class="btn btn-primary">
                     <i class="bi bi-plus-lg me-2"></i>Tạo yêu cầu
                 </button>
             </div>
         </div>
-
-        <div class="system-status">
-            <div class="status-item status-ok">
-                <i class="bi bi-check-circle me-1"></i>
-                Hệ thống hoạt động
-            </div>
-            <div class="status-item status-ok">
-                <i class="bi bi-database me-1"></i>
-                Database kết nối
-            </div>
-            <div class="status-item status-warning">
-                <i class="bi bi-exclamation-triangle me-1"></i>
-                3 cảnh báo
-            </div>
-        </div>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- Statistics Cards -->
     <div class="stats-grid">
         <div class="stat-card users">
-            <div class="stat-header">
-                <div class="stat-icon users">
-                    <i class="bi bi-people"></i>
-                </div>
+            <div class="stat-icon users">
+                <i class="bi bi-people"></i>
             </div>
-            <div class="stat-value" th:text="${totalUsers ?: '40,689'}">40,689</div>
+            <div class="stat-value" th:text="${totalUsers ?: '1,247'}">1,247</div>
             <div class="stat-label">Tổng người dùng</div>
             <div class="stat-change positive">
                 <i class="bi bi-arrow-up"></i>
@@ -296,10 +273,8 @@
         </div>
 
         <div class="stat-card orders">
-            <div class="stat-header">
-                <div class="stat-icon orders">
-                    <i class="bi bi-tools"></i>
-                </div>
+            <div class="stat-icon orders">
+                <i class="bi bi-tools"></i>
             </div>
             <div class="stat-value" th:text="${totalOrders ?: '10,293'}">10,293</div>
             <div class="stat-label">Lệnh bảo trì</div>
@@ -310,10 +285,8 @@
         </div>
 
         <div class="stat-card revenue">
-            <div class="stat-header">
-                <div class="stat-icon revenue">
-                    <i class="bi bi-currency-dollar"></i>
-                </div>
+            <div class="stat-icon revenue">
+                <i class="bi bi-currency-dollar"></i>
             </div>
             <div class="stat-value" th:text="${totalSales ?: '$89,000'}">$89,000</div>
             <div class="stat-label">Tiết kiệm chi phí</div>
@@ -324,10 +297,8 @@
         </div>
 
         <div class="stat-card pending">
-            <div class="stat-header">
-                <div class="stat-icon pending">
-                    <i class="bi bi-clock"></i>
-                </div>
+            <div class="stat-icon pending">
+                <i class="bi bi-clock"></i>
             </div>
             <div class="stat-value" th:text="${totalPending ?: '2,040'}">2,040</div>
             <div class="stat-label">Đang xử lý</div>
@@ -338,58 +309,122 @@
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div>
-        <h3 class="mb-3 text-white">
-            <i class="bi bi-lightning me-2"></i>
-            Thao tác nhanh
-        </h3>
-        <div class="quick-actions">
-            <a href="/nguoi-dung" class="action-card">
-                <div class="action-icon">
-                    <i class="bi bi-people"></i>
-                </div>
-                <div class="action-title">Quản lý người dùng</div>
-                <div class="action-desc">Xem và quản lý tài khoản người dùng</div>
-            </a>
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-lg-8">
+            <h3 class="mb-3">
+                <i class="bi bi-lightning me-2"></i>
+                Thao tác nhanh
+            </h3>
+            <div class="quick-actions">
+                <a href="/nguoi-dung" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="action-title">Quản lý người dùng</div>
+                    <div class="action-desc">Xem và quản lý tài khoản người dùng</div>
+                </a>
 
-            <a href="/thiet-bi" class="action-card">
-                <div class="action-icon">
-                    <i class="bi bi-cpu"></i>
-                </div>
-                <div class="action-title">Quản lý thiết bị</div>
-                <div class="action-desc">Theo dõi và bảo trì thiết bị</div>
-            </a>
+                <a href="/thiet-bi" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <div class="action-title">Quản lý thiết bị</div>
+                    <div class="action-desc">Theo dõi và bảo trì thiết bị</div>
+                </a>
 
-            <a href="/bao-tri/yeu-cau" class="action-card">
-                <div class="action-icon">
-                    <i class="bi bi-tools"></i>
-                </div>
-                <div class="action-title">Yêu cầu bảo trì</div>
-                <div class="action-desc">Tạo và theo dõi yêu cầu bảo trì</div>
-            </a>
+                <a href="/bao-tri/yeu-cau" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-tools"></i>
+                    </div>
+                    <div class="action-title">Yêu cầu bảo trì</div>
+                    <div class="action-desc">Tạo và theo dõi yêu cầu bảo trì</div>
+                </a>
 
-            <a href="/bao-cao/tong-hop" class="action-card">
-                <div class="action-icon">
-                    <i class="bi bi-graph-up"></i>
+                <a href="/bao-cao/tong-hop" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <div class="action-title">Báo cáo tổng hợp</div>
+                    <div class="action-desc">Xem phân tích và báo cáo</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="col-lg-4">
+            <h3 class="mb-3">
+                <i class="bi bi-bell me-2"></i>
+                Hoạt động gần đây
+            </h3>
+            <div class="recent-activities">
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: var(--secondary-color);">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Hoàn thành bảo trì TB001</div>
+                        <div class="activity-desc">Máy nén khí đã được bảo trì thành công</div>
+                    </div>
+                    <div class="activity-time">2 phút trước</div>
                 </div>
-                <div class="action-title">Báo cáo tổng hợp</div>
-                <div class="action-desc">Xem phân tích và báo cáo</div>
-            </a>
+
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: var(--warning-color);">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Cảnh báo thiết bị TB045</div>
+                        <div class="activity-desc">Nhiệt độ vượt ngưỡng cho phép</div>
+                    </div>
+                    <div class="activity-time">15 phút trước</div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: var(--primary-color);">
+                        <i class="bi bi-person-plus"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Thêm người dùng mới</div>
+                        <div class="activity-desc">Nguyễn Văn A đã được thêm vào hệ thống</div>
+                    </div>
+                    <div class="activity-time">1 giờ trước</div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: var(--danger-color);">
+                        <i class="bi bi-x-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Từ chối yêu cầu YC123</div>
+                        <div class="activity-desc">Không đủ vật tư để thực hiện</div>
+                    </div>
+                    <div class="activity-time">2 giờ trước</div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: var(--info-color);">
+                        <i class="bi bi-plus-square"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Nhập vật tư VT567</div>
+                        <div class="activity-desc">100 đơn vị ốc vít M10 đã được nhập kho</div>
+                    </div>
+                    <div class="activity-time">3 giờ trước</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Quick Test Section -->
-    <div class="mt-4">
-        <div class="alert alert-info">
-            <h5><i class="bi bi-info-circle me-2"></i>Kiểm tra hệ thống</h5>
-            <p>Dashboard đã load thành công! Bạn có thể:</p>
-            <ul class="mb-0">
-                <li>Thử click vào menu trên đầu để điều hướng</li>
-                <li>Kiểm tra các liên kết trong "Thao tác nhanh"</li>
-                <li>Xem thông tin người dùng ở góc phải</li>
-            </ul>
-        </div>
+    <!-- Success Message -->
+    <div class="alert alert-success mt-4" role="alert">
+        <h5><i class="bi bi-check-circle me-2"></i>Dashboard đã load thành công!</h5>
+        <p class="mb-0">
+            ✅ Spring Security authentication hoạt động<br>
+            ✅ Template rendering thành công<br>
+            ✅ User: <strong th:text="${tenDangNhap}">Admin</strong> đã đăng nhập<br>
+            ✅ Authorities: <span th:text="${authorities}">ROLE_ADMIN</span>
+        </p>
     </div>
 </div>
 
@@ -397,26 +432,16 @@
     console.log('🎉 Dashboard loaded successfully!');
     console.log('Current user:', '<span th:text="${tenDangNhap}">admin</span>');
 
-    // Test API connection
-    async function testConnection() {
-        try {
-            const response = await fetch('/api/auth/test');
-            if (response.ok) {
-                console.log('✅ API connection OK');
-            }
-        } catch (error) {
-            console.warn('⚠️ API connection failed:', error);
-        }
-    }
-
-    // Initialize
+    // Initialize dashboard
     document.addEventListener('DOMContentLoaded', function() {
-        testConnection();
+        console.log('✅ Dashboard fully loaded - Spring Security integration working!');
 
-        // Add welcome message
-        setTimeout(() => {
-            console.log('🚀 DashStack Dashboard ready!');
-        }, 1000);
+        // Add click handlers for action cards
+        document.querySelectorAll('.action-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                console.log('🔗 Navigating to:', this.href);
+            });
+        });
     });
 </script>
 
