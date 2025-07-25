@@ -143,56 +143,6 @@
             font-size: 0.95rem;
         }
 
-        .google-btn {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            background: white;
-            color: #374151;
-            font-size: 0.95rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        .google-btn:hover {
-            border-color: #6366f1;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .divider {
-            text-align: center;
-            margin: 20px 0;
-            position: relative;
-            color: #9ca3af;
-            font-size: 0.9rem;
-        }
-
-        .divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: #e5e7eb;
-            z-index: 1;
-        }
-
-        .divider span {
-            background: white;
-            padding: 0 15px;
-            position: relative;
-            z-index: 2;
-        }
-
         .form-group {
             margin-bottom: 20px;
         }
@@ -275,46 +225,54 @@
             transform: none;
         }
 
-        .footer-links {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        .footer-links a {
-            color: #6366f1;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        .footer-links a:hover {
-            text-decoration: underline;
-        }
-
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .social-link {
-            width: 40px;
-            height: 40px;
+        .alert {
+            padding: 12px;
             border-radius: 8px;
-            background: #f3f4f6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280;
-            text-decoration: none;
-            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
         }
 
-        .social-link:hover {
-            background: #6366f1;
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #10b981;
             color: white;
-            transform: translateY(-2px);
+        }
+
+        .alert-error {
+            background: #ef4444;
+            color: white;
+        }
+
+        .alert-info {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .debug-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.8);
         }
 
         @media (max-width: 768px) {
@@ -342,93 +300,6 @@
                 font-size: 1.5rem;
             }
         }
-
-        .floating-shapes {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .shape {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: floatShapes 15s infinite ease-in-out;
-        }
-
-        .shape:nth-child(1) {
-            width: 80px;
-            height: 80px;
-            top: 20%;
-            left: 10%;
-            animation-delay: -5s;
-        }
-
-        .shape:nth-child(2) {
-            width: 60px;
-            height: 60px;
-            top: 70%;
-            right: 15%;
-            animation-delay: -10s;
-        }
-
-        .shape:nth-child(3) {
-            width: 40px;
-            height: 40px;
-            top: 40%;
-            right: 30%;
-            animation-delay: -2s;
-        }
-
-        @keyframes floatShapes {
-            0%, 100% {
-                transform: translateY(0px) rotate(0deg);
-                opacity: 0.3;
-            }
-            50% {
-                transform: translateY(-50px) rotate(180deg);
-                opacity: 0.8;
-            }
-        }
-
-        .loading {
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
-        .success-message, .error-message {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
-        }
-
-        .success-message {
-            background: #10b981;
-            color: white;
-        }
-
-        .error-message {
-            background: #ef4444;
-            color: white;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
@@ -436,14 +307,17 @@
 
 <div class="login-container">
     <div class="left-section">
-        <div class="floating-shapes">
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-        </div>
         <div class="left-content">
             <h2>Chào mừng trở lại!</h2>
             <p>Hệ thống quản lý bảo trì thiết bị công nghiệp hiện đại và thông minh</p>
+
+            <div class="debug-info">
+                <strong>🔧 Debug Info:</strong><br>
+                • Sử dụng Form Login (không phải API)<br>
+                • Session-based authentication<br>
+                • Auto-redirect sau khi đăng nhập<br>
+                • Test account: admin/123456
+            </div>
         </div>
         <div class="hero-image">
             🔧
@@ -451,43 +325,39 @@
     </div>
 
     <div class="right-section">
-        <form class="login-form" id="loginForm">
+        <!-- ✅ SỬA: Dùng form action thay vì JavaScript API -->
+        <form class="login-form" action="/perform-login" method="post" id="loginForm">
             <div class="form-header">
                 <h1>Đăng nhập</h1>
                 <p>Vui lòng đăng nhập để tiếp tục</p>
             </div>
 
-            <div class="success-message" id="successMessage">
-                Đăng nhập thành công! Đang chuyển hướng...
-            </div>
-
-            <div class="error-message" id="errorMessage">
+            <!-- ✅ Hiển thị thông báo lỗi từ server -->
+            <div class="alert alert-error" id="errorMessage" th:if="${param.error}">
                 Tên đăng nhập hoặc mật khẩu không đúng!
             </div>
 
-            <button type="button" class="google-btn">
-                <svg width="20" height="20" viewBox="0 0 24 24">
-                    <path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Đăng nhập với Google
-            </button>
+            <div class="alert alert-success" id="logoutMessage" th:if="${param.logout}">
+                Đăng xuất thành công!
+            </div>
 
-            <div class="divider">
-                <span>Hoặc</span>
+            <div class="alert alert-info" id="infoMessage">
+                🚀 Sử dụng Form Login - Session based authentication
             </div>
 
             <div class="form-group">
                 <label for="username">Tên đăng nhập</label>
-                <input type="text" id="username" name="username" class="form-input" placeholder="Nhập tên đăng nhập của bạn" required>
+                <input type="text" id="username" name="username" class="form-input"
+                       placeholder="Nhập tên đăng nhập của bạn"
+                       value="admin" required>
             </div>
 
             <div class="form-group">
                 <label for="password">Mật khẩu</label>
                 <div class="password-wrapper">
-                    <input type="password" id="password" name="password" class="form-input" placeholder="Nhập mật khẩu của bạn" required>
+                    <input type="password" id="password" name="password" class="form-input"
+                           placeholder="Nhập mật khẩu của bạn"
+                           value="123456" required>
                     <button type="button" class="password-toggle" onclick="togglePassword()">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -497,47 +367,22 @@
                 </div>
             </div>
 
-            <button type="submit" class="login-btn" id="loginBtn">Đăng nhập</button>
+            <button type="submit" class="login-btn" id="loginBtn">
+                Đăng nhập
+            </button>
 
-            <div class="footer-links">
-                <a href="#" onclick="showForgotPassword()">Quên mật khẩu?</a>
-            </div>
-
-            <div class="social-links">
-                <a href="#" class="social-link" title="Email">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                        <polyline points="22,6 12,13 2,6"/>
-                    </svg>
-                </a>
-                <a href="#" class="social-link" title="Website">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                        <line x1="8" y1="21" x2="16" y2="21"/>
-                        <line x1="12" y1="17" x2="12" y2="21"/>
-                    </svg>
-                </a>
-                <a href="#" class="social-link" title="Hỗ trợ">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                    </svg>
-                </a>
-                <a href="#" class="social-link" title="LinkedIn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-                        <rect x="2" y="9" width="4" height="12"/>
-                        <circle cx="4" cy="4" r="2"/>
-                    </svg>
-                </a>
+            <!-- ✅ Test buttons -->
+            <div style="margin-top: 1rem; text-align: center;">
+                <small style="color: #6b7280;">
+                    Test: <a href="/debug/check-auth" target="_blank" style="color: #6366f1;">Check Auth</a> |
+                    <a href="/test-dashboard" target="_blank" style="color: #6366f1;">Test Dashboard</a>
+                </small>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    // ✅ API base URL với port đúng
-    const API_BASE_URL = window.location.origin + '/api';
-
     function togglePassword() {
         const passwordInput = document.getElementById('password');
         const toggleBtn = document.querySelector('.password-toggle');
@@ -561,167 +406,36 @@
         }
     }
 
-    function showForgotPassword() {
-        alert('Tính năng quên mật khẩu sẽ được triển khai sớm!');
-    }
-
-    function showMessage(type, message) {
-        const successMsg = document.getElementById('successMessage');
-        const errorMsg = document.getElementById('errorMessage');
-
-        successMsg.style.display = 'none';
-        errorMsg.style.display = 'none';
-
-        if (type === 'success') {
-            successMsg.textContent = message;
-            successMsg.style.display = 'block';
-        } else {
-            errorMsg.textContent = message;
-            errorMsg.style.display = 'block';
-        }
-    }
-
-    function setLoading(isLoading) {
+    // ✅ Form submit handler - chỉ để hiển thị loading
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
         const loginBtn = document.getElementById('loginBtn');
-        const form = document.getElementById('loginForm');
 
-        if (isLoading) {
-            loginBtn.disabled = true;
-            loginBtn.innerHTML = '<span class="spinner"></span> Đang đăng nhập...';
-            form.classList.add('loading');
-        } else {
-            loginBtn.disabled = false;
-            loginBtn.innerHTML = 'Đăng nhập';
-            form.classList.remove('loading');
-        }
-    }
+        // Show loading state
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<span class="spinner"></span> Đang đăng nhập...';
 
-    // ✅ Xử lý đăng nhập - SIMPLE VERSION
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-
-        console.log('🚀 Starting login process...');
-        console.log('📝 Username:', username);
-
-        if (!username || !password) {
-            showMessage('error', 'Vui lòng nhập đầy đủ thông tin!');
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            const apiUrl = `${API_BASE_URL}/auth/dang-nhap`;
-            console.log('📡 API URL:', apiUrl);
-
-            const requestData = {
-                tenDangNhap: username,
-                matKhau: password
-            };
-
-            console.log('📤 Request data:', requestData);
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(requestData)
-            });
-
-            console.log('📥 Response status:', response.status);
-            console.log('📥 Response headers:', response.headers);
-
-            const responseText = await response.text();
-            console.log('📄 Response text:', responseText);
-
-            if (!responseText) {
-                throw new Error('Empty response from server');
-            }
-
-            let data;
-            try {
-                data = JSON.parse(responseText);
-                console.log('✅ Parsed JSON:', data);
-            } catch (parseError) {
-                console.error('❌ JSON parse error:', parseError);
-                throw new Error(`Invalid JSON response: ${responseText}`);
-            }
-
-            if (response.ok && data.success) {
-                console.log('🎉 Login successful!');
-
-                // Save token
-                if (data.token) {
-                    localStorage.setItem('token', data.token);
-                    console.log('💾 Token saved');
-                }
-
-                if (data.nguoiDung) {
-                    localStorage.setItem('nguoiDung', JSON.stringify(data.nguoiDung));
-                    console.log('💾 User data saved');
-                }
-
-                showMessage('success', 'Đăng nhập thành công! Đang chuyển hướng...');
-
-                // Simple redirect
-                setTimeout(() => {
-                    console.log('🔄 Redirecting to dashboard...');
-                    window.location.href = '/dashboard';
-                }, 1000);
-
-            } else {
-                console.log('❌ Login failed:', data);
-                throw new Error(data.message || 'Đăng nhập thất bại!');
-            }
-
-        } catch (error) {
-            console.error('💥 Login error:', error);
-            showMessage('error', error.message || 'Đã xảy ra lỗi khi đăng nhập');
-        } finally {
-            setLoading(false);
-        }
+        console.log('🚀 Form login submitted - using Spring Security form login');
     });
 
-    // ✅ Test connection on load
-    window.addEventListener('load', async function() {
-        console.log('🚀 Page loaded');
-
-        // Auto-fill for testing
-        if (window.location.hostname === 'localhost') {
-            document.getElementById('username').value = 'admin';
-            document.getElementById('password').value = '123456';
-            console.log('🔧 Auto-filled for testing');
+    // ✅ Auto-show info message
+    window.addEventListener('load', function() {
+        const infoMsg = document.getElementById('infoMessage');
+        if (infoMsg) {
+            infoMsg.classList.add('show');
+            setTimeout(() => {
+                infoMsg.classList.remove('show');
+            }, 5000);
         }
 
-        // Test API connection
-        try {
-            const response = await fetch(`${API_BASE_URL}/auth/test`);
-            if (response.ok) {
-                const data = await response.json();
-                console.log('✅ API connection OK:', data);
-            } else {
-                console.log('⚠️ API connection failed:', response.status);
-                showMessage('error', 'Không thể kết nối tới server');
-            }
-        } catch (error) {
-            console.error('💥 Connection test failed:', error);
-            showMessage('error', 'Không thể kết nối tới server. Vui lòng kiểm tra server đang chạy.');
-        }
+        console.log('🔧 Login page loaded - Form-based authentication ready');
     });
 
-    // Quick login shortcut
+    // ✅ Quick login shortcut for testing
     document.addEventListener('keydown', function(e) {
         if (e.ctrlKey && e.shiftKey && e.key === 'L') {
             e.preventDefault();
             console.log('⚡ Quick login triggered');
-            document.getElementById('username').value = 'admin';
-            document.getElementById('password').value = '123456';
-            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            document.getElementById('loginForm').submit();
         }
     });
 </script>
