@@ -1,407 +1,308 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-<nav class="top-navigation" th:fragment="topnav">
-    <div class="container-fluid">
-        <style>
-            /* Top Navigation Menu Styles */
-            .top-nav-menu {
-                list-style: none;
-                padding: 0;
-                margin: 0;
-                display: flex;
-                justify-content: center;
-                flex-wrap: wrap;
-                gap: 0;
-            }
+<!-- Navigation Menu -->
+<nav th:fragment="navigation" class="nav-menu">
+    <style>
+        /* Navigation Menu Styles */
+        .nav-menu {
+            background: var(--bg-nav);
+            box-shadow: var(--shadow-md);
+            padding: 0;
+            position: sticky;
+            top: 57px;
+            z-index: 1020;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
 
-            .top-nav-item {
-                position: relative;
-            }
+        .nav-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            overflow-x: auto;
+            padding: 0 2rem;
+            position: relative;
+        }
 
-            .top-nav-link {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 1rem 1.5rem;
-                color: var(--gray-700);
-                text-decoration: none;
-                transition: all 0.3s ease;
-                border-radius: 8px;
-                margin: 0 0.25rem;
-                font-weight: 500;
-                position: relative;
-            }
+        .nav-list {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 0;
+            min-width: max-content;
+        }
 
-            .top-nav-link:hover {
-                background: linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(162, 155, 254, 0.1));
-                color: var(--primary-color);
-                transform: translateY(-2px);
-            }
+        .nav-item {
+            position: relative;
+            z-index: 1050;
+        }
 
-            .top-nav-link.active {
-                background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-                color: white;
-                box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
-            }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            color: var(--text-nav);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+        }
 
-            .top-nav-link i {
-                font-size: 1.1rem;
-            }
+        .nav-link:hover {
+            color: var(--text-white);
+            background: var(--bg-nav-hover);
+            border-bottom-color: var(--ocean-blue);
+        }
 
-            .dropdown-toggle::after {
-                content: '\F282';
-                font-family: 'bootstrap-icons';
-                border: none;
-                font-size: 0.8rem;
-                margin-left: 0.5rem;
-                transition: transform 0.3s ease;
-            }
+        .nav-link.active {
+            color: var(--text-white);
+            background: var(--bg-nav-hover);
+            border-bottom-color: var(--ocean-blue);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
 
-            .dropdown-toggle.show::after {
-                transform: rotate(180deg);
-            }
+        .nav-link i {
+            font-size: 1.1rem;
+        }
 
-            /* Dropdown Menu */
-            .top-dropdown-menu {
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(20px);
-                border: 1px solid rgba(108, 92, 231, 0.1);
-                border-radius: 12px;
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-                padding: 0.5rem;
-                margin-top: 0.5rem;
-                min-width: 220px;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                z-index: 1000;
-                display: none;
+        .badge-notification {
+            background: linear-gradient(135deg, var(--red), #DC2626);
+            color: white;
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 0.5rem;
+            font-weight: 600;
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            padding: 0.75rem 0;
+            margin-top: 0.5rem;
+            min-width: 240px;
+            animation: dropdownSlide 0.3s ease-out;
+            z-index: 1060;
+            display: none;
+        }
+
+        .nav-menu,
+        .nav-container {
+            overflow: visible;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        @keyframes dropdownSlide {
+            from {
                 opacity: 0;
                 transform: translateY(-10px);
-                transition: all 0.3s ease;
             }
-
-            .top-dropdown-menu.show {
-                display: block;
+            to {
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
 
-            .top-dropdown-item {
+        .dropdown-item {
+            padding: 0.875rem 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-size: 0.9rem;
+            margin: 0.125rem 0;
+        }
+
+        .dropdown-item:hover {
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            transform: translateX(5px);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .dropdown-item:hover i {
+            color: var(--primary-blue);
+        }
+
+        .dropdown-divider {
+            margin: 0.5rem 1rem;
+            border-color: var(--border-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-link {
                 padding: 0.75rem 1rem;
-                border-radius: 8px;
-                color: var(--gray-700);
-                text-decoration: none;
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-                transition: all 0.2s ease;
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
 
-            .top-dropdown-item:hover {
-                background: linear-gradient(135deg, rgba(108, 92, 231, 0.08), rgba(162, 155, 254, 0.08));
-                color: var(--primary-color);
+            .nav-container {
+                padding: 0 1rem;
             }
+        }
+    </style>
 
-            .top-dropdown-item.active {
-                background: linear-gradient(135deg, rgba(108, 92, 231, 0.15), rgba(162, 155, 254, 0.15));
-                color: var(--primary-color);
-                font-weight: 600;
-            }
-
-            .top-dropdown-item i {
-                width: 16px;
-                text-align: center;
-            }
-
-            .notification-dot {
-                width: 8px;
-                height: 8px;
-                background: var(--danger-color);
-                border-radius: 50%;
-                margin-left: auto;
-                animation: pulse 2s infinite;
-            }
-
-            @keyframes pulse {
-                0% { opacity: 1; }
-                50% { opacity: 0.5; }
-                100% { opacity: 1; }
-            }
-
-            /* Responsive */
-            @media (max-width: 992px) {
-                .top-nav-menu {
-                    flex-direction: column;
-                    align-items: center;
-                }
-
-                .top-nav-link {
-                    width: 100%;
-                    justify-content: center;
-                    margin: 0.25rem 0;
-                }
-
-                .top-dropdown-menu {
-                    position: static;
-                    box-shadow: none;
-                    background: rgba(248, 250, 252, 0.9);
-                    margin: 0;
-                    margin-top: 0.5rem;
-                }
-            }
-
-            @media (max-width: 768px) {
-                .top-nav-link {
-                    padding: 0.75rem 1rem;
-                    font-size: 0.9rem;
-                }
-
-                .top-dropdown-item {
-                    padding: 0.6rem 0.75rem;
-                }
-            }
-        </style>
-
-        <ul class="top-nav-menu">
+    <div class="nav-container">
+        <ul class="nav-list">
             <!-- Dashboard -->
-            <li class="top-nav-item">
-                <a href="/dashboard" class="top-nav-link" th:classappend="${#request.requestURI == '/dashboard' ? 'active' : ''}">
+            <li class="nav-item">
+                <a href="/dashboard" class="nav-link active">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
 
-            <!-- Quản lý người dùng -->
-            <li class="top-nav-item">
-                <a href="#" class="top-nav-link dropdown-toggle" data-target="menuNguoiDung"
-                   th:classappend="${#strings.startsWith(#request.requestURI, '/nguoi-dung') ? 'active' : ''}">
-                    <i class="bi bi-people"></i>
-                    <span>Người dùng</span>
-                </a>
-                <div class="top-dropdown-menu" id="menuNguoiDung">
-                    <a href="/nguoi-dung" class="top-dropdown-item" th:classappend="${#request.requestURI == '/nguoi-dung' ? 'active' : ''}">
-                        <i class="bi bi-list"></i>Danh sách người dùng
-                    </a>
-                    <a href="/nguoi-dung/them" class="top-dropdown-item" th:classappend="${#request.requestURI == '/nguoi-dung/them' ? 'active' : ''}">
-                        <i class="bi bi-plus-circle"></i>Thêm người dùng
-                    </a>
-                    <a href="/nguoi-dung/phan-quyen" class="top-dropdown-item" th:classappend="${#request.requestURI == '/nguoi-dung/phan-quyen' ? 'active' : ''}">
-                        <i class="bi bi-shield-check"></i>Phân quyền
-                    </a>
-                </div>
-            </li>
-
-            <!-- Quản lý thiết bị -->
-            <li class="top-nav-item">
-                <a href="#" class="top-nav-link dropdown-toggle" data-target="menuThietBi"
-                   th:classappend="${#strings.startsWith(#request.requestURI, '/thiet-bi') ? 'active' : ''}">
+            <!-- Thiết bị (All roles) -->
+            <li class="nav-item">
+                <a href="/api/thiet-bi" class="nav-link">
                     <i class="bi bi-cpu"></i>
                     <span>Thiết bị</span>
                 </a>
-                <div class="top-dropdown-menu" id="menuThietBi">
-                    <a href="/thiet-bi" class="top-dropdown-item" th:classappend="${#request.requestURI == '/thiet-bi' ? 'active' : ''}">
-                        <i class="bi bi-list"></i>Danh sách thiết bị
-                    </a>
-                    <a href="/thiet-bi/them" class="top-dropdown-item" th:classappend="${#request.requestURI == '/thiet-bi/them' ? 'active' : ''}">
-                        <i class="bi bi-plus-circle"></i>Thêm thiết bị
-                    </a>
-                    <a href="/thiet-bi/phan-cong" class="top-dropdown-item" th:classappend="${#request.requestURI == '/thiet-bi/phan-cong' ? 'active' : ''}">
-                        <i class="bi bi-person-gear"></i>Phân công thiết bị
-                    </a>
-                </div>
             </li>
 
-            <!-- Quản lý vật tư -->
-            <li class="top-nav-item">
-                <a href="#" class="top-nav-link dropdown-toggle" data-target="menuVatTu"
-                   th:classappend="${#strings.startsWith(#request.requestURI, '/vat-tu') ? 'active' : ''}">
+            <!-- Vật tư (All roles) -->
+            <li class="nav-item">
+                <a href="/api/vat-tu" class="nav-link">
                     <i class="bi bi-box-seam"></i>
                     <span>Vật tư</span>
-                    <div class="notification-dot" th:if="${vatTuThieuHang > 0}"></div>
                 </a>
-                <div class="top-dropdown-menu" id="menuVatTu">
-                    <a href="/vat-tu" class="top-dropdown-item" th:classappend="${#request.requestURI == '/vat-tu' ? 'active' : ''}">
-                        <i class="bi bi-list"></i>Danh sách vật tư
-                    </a>
-                    <a href="/vat-tu/them" class="top-dropdown-item" th:classappend="${#request.requestURI == '/vat-tu/them' ? 'active' : ''}">
-                        <i class="bi bi-plus-circle"></i>Thêm vật tư
-                    </a>
-                    <a href="/vat-tu/quan-ly-kho" class="top-dropdown-item" th:classappend="${#request.requestURI == '/vat-tu/quan-ly-kho' ? 'active' : ''}">
-                        <i class="bi bi-building"></i>Quản lý kho
-                    </a>
-                </div>
             </li>
 
             <!-- Bảo trì -->
-            <li class="top-nav-item">
-                <a href="#" class="top-nav-link dropdown-toggle" data-target="menuBaoTri"
-                   th:classappend="${#strings.startsWith(#request.requestURI, '/bao-tri') ? 'active' : ''}">
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-tools"></i>
                     <span>Bảo trì</span>
-                    <div class="notification-dot" th:if="${yeuCauChoDuyet > 0}"></div>
+                    <span class="badge-notification">8</span>
                 </a>
-                <div class="top-dropdown-menu" id="menuBaoTri">
-                    <a href="/bao-tri/ke-hoach" class="top-dropdown-item" th:classappend="${#request.requestURI == '/bao-tri/ke-hoach' ? 'active' : ''}">
-                        <i class="bi bi-calendar3"></i>Kế hoạch bảo trì
-                    </a>
-                    <a href="/bao-tri/yeu-cau" class="top-dropdown-item" th:classappend="${#request.requestURI == '/bao-tri/yeu-cau' ? 'active' : ''}">
-                        <i class="bi bi-clipboard-check"></i>Yêu cầu bảo trì
-                    </a>
-                    <a href="/bao-tri/thuc-hien" class="top-dropdown-item" th:classappend="${#request.requestURI == '/bao-tri/thuc-hien' ? 'active' : ''}">
-                        <i class="bi bi-wrench"></i>Thực hiện bảo trì
-                    </a>
-                    <a href="/bao-tri/kiem-tra-dinh-ky" class="top-dropdown-item" th:classappend="${#request.requestURI == '/bao-tri/kiem-tra-dinh-ky' ? 'active' : ''}">
-                        <i class="bi bi-search"></i>Kiểm tra định kỳ
-                    </a>
-                    <a href="/bao-tri/canh-bao" class="top-dropdown-item" th:classappend="${#request.requestURI == '/bao-tri/canh-bao' ? 'active' : ''}">
-                        <i class="bi bi-exclamation-triangle"></i>Cảnh báo lỗi
-                    </a>
-                </div>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/api/yeu-cau-bao-tri"><i class="bi bi-clipboard-check"></i>Yêu cầu bảo trì</a></li>
+                    <li class="role-admin role-manager"><a class="dropdown-item" href="/bao-tri/duyet-yeu-cau"><i class="bi bi-check2-square"></i>Duyet yêu cầu</a></li>
+                    <li class="role-admin role-manager"><a class="dropdown-item" href="/api/ke-hoach-bao-tri"><i class="bi bi-calendar3"></i>Kế hoạch bảo trì</a></li>
+                    <li class="role-technician role-admin"><a class="dropdown-item" href="/api/thuc-hien-bao-tri/cong-viec"><i class="bi bi-wrench"></i>Thực hiện bảo trì</a></li>
+                    <li><a class="dropdown-item" href="/api/kiem-tra-dinh-ky"><i class="bi bi-search"></i>Kiểm tra định kỳ</a></li>
+                    <li><a class="dropdown-item" href="/bao-tri/lich-su"><i class="bi bi-clock-history"></i>Lịch sử bảo trì</a></li>
+                    <li><a class="dropdown-item" href="/api/canh-bao-loi"><i class="bi bi-exclamation-triangle"></i>Cảnh báo lỗi</a></li>
+                </ul>
             </li>
 
-            <!-- Đội bảo trì -->
-            <li class="top-nav-item">
-                <a href="#" class="top-nav-link dropdown-toggle" data-target="menuDoiBaoTri"
-                   th:classappend="${#strings.startsWith(#request.requestURI, '/doi-bao-tri') ? 'active' : ''}">
+            <!-- Đội bảo trì (Admin + Manager) -->
+            <li class="nav-item dropdown role-admin role-manager">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-people-fill"></i>
                     <span>Đội bảo trì</span>
                 </a>
-                <div class="top-dropdown-menu" id="menuDoiBaoTri">
-                    <a href="/doi-bao-tri" class="top-dropdown-item" th:classappend="${#request.requestURI == '/doi-bao-tri' ? 'active' : ''}">
-                        <i class="bi bi-list"></i>Danh sách đội
-                    </a>
-                    <a href="/doi-bao-tri/them" class="top-dropdown-item" th:classappend="${#request.requestURI == '/doi-bao-tri/them' ? 'active' : ''}">
-                        <i class="bi bi-plus-circle"></i>Thêm đội mới
-                    </a>
-                    <a href="/doi-bao-tri/phan-cong" class="top-dropdown-item" th:classappend="${#request.requestURI == '/doi-bao-tri/phan-cong' ? 'active' : ''}">
-                        <i class="bi bi-person-gear"></i>Phân công công việc
-                    </a>
-                </div>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/api/doi-bao-tri"><i class="bi bi-list"></i>Danh sách đội</a></li>
+                    <li><a class="dropdown-item" href="/doi-bao-tri/them"><i class="bi bi-plus-circle"></i>Thêm đội mới</a></li>
+                    <li><a class="dropdown-item" href="/doi-bao-tri/thanh-vien"><i class="bi bi-person-plus"></i>Quản lý thành viên</a></li>
+                    <li><a class="dropdown-item" href="/doi-bao-tri/phan-cong"><i class="bi bi-person-gear"></i>Phân công công việc</a></li>
+                    <li><a class="dropdown-item" href="/doi-bao-tri/hieu-suat"><i class="bi bi-graph-up"></i>Hiệu suất đội</a></li>
+                </ul>
             </li>
 
-            <!-- Sản xuất -->
-            <li class="top-nav-item">
-                <a href="#" class="top-nav-link dropdown-toggle" data-target="menuSanXuat"
-                   th:classappend="${#strings.startsWith(#request.requestURI, '/san-xuat') ? 'active' : ''}">
-                    <i class="bi bi-graph-up"></i>
-                    <span>Sản xuất</span>
-                </a>
-                <div class="top-dropdown-menu" id="menuSanXuat">
-                    <a href="/san-xuat/thong-tin" class="top-dropdown-item" th:classappend="${#request.requestURI == '/san-xuat/thong-tin' ? 'active' : ''}">
-                        <i class="bi bi-info-circle"></i>Thông tin sản xuất
-                    </a>
-                    <a href="/san-xuat/hieu-nang" class="top-dropdown-item" th:classappend="${#request.requestURI == '/san-xuat/hieu-nang' ? 'active' : ''}">
-                        <i class="bi bi-speedometer"></i>Hiệu năng thiết bị
-                    </a>
-                </div>
-            </li>
-
-            <!-- Báo cáo -->
-            <li class="top-nav-item">
-                <a href="#" class="top-nav-link dropdown-toggle" data-target="menuBaoCao"
-                   th:classappend="${#strings.startsWith(#request.requestURI, '/bao-cao') ? 'active' : ''}">
+            <!-- Báo cáo & Thống kê (Admin + Manager) -->
+            <li class="nav-item dropdown role-admin role-manager">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-file-earmark-bar-graph"></i>
                     <span>Báo cáo</span>
                 </a>
-                <div class="top-dropdown-menu" id="menuBaoCao">
-                    <a href="/bao-cao/oee" class="top-dropdown-item" th:classappend="${#request.requestURI == '/bao-cao/oee' ? 'active' : ''}">
-                        <i class="bi bi-graph-up"></i>Báo cáo OEE
-                    </a>
-                    <a href="/bao-cao/mtbf" class="top-dropdown-item" th:classappend="${#request.requestURI == '/bao-cao/mtbf' ? 'active' : ''}">
-                        <i class="bi bi-clipboard-data"></i>Báo cáo MTBF
-                    </a>
-                    <a href="/bao-cao/tong-hop" class="top-dropdown-item" th:classappend="${#request.requestURI == '/bao-cao/tong-hop' ? 'active' : ''}">
-                        <i class="bi bi-file-earmark-bar-graph"></i>Báo cáo tổng hợp
-                    </a>
-                    <a href="/bao-cao/thong-ke" class="top-dropdown-item" th:classappend="${#request.requestURI == '/bao-cao/thong-ke' ? 'active' : ''}">
-                        <i class="bi bi-pie-chart"></i>Thống kê
-                    </a>
-                </div>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/api/bao-cao/tong-hop"><i class="bi bi-graph-up"></i>Báo cáo tổng hợp</a></li>
+                    <li><a class="dropdown-item" href="/api/bao-cao/oee"><i class="bi bi-speedometer"></i>Báo cáo OEE</a></li>
+                    <li><a class="dropdown-item" href="/api/bao-cao/mtbf"><i class="bi bi-clipboard-data"></i>Báo cáo MTBF</a></li>
+                    <li><a class="dropdown-item" href="/api/thong-ke/bao-tri"><i class="bi bi-pie-chart"></i>Thống kê bảo trì</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/api/thong-ke/thiet-bi"><i class="bi bi-cpu"></i>Báo cáo thiết bị</a></li>
+                    <li><a class="dropdown-item" href="/bao-cao/vat-tu"><i class="bi bi-box-seam"></i>Báo cáo vật tư</a></li>
+                    <li><a class="dropdown-item" href="/api/thong-ke/hieu-suat"><i class="bi bi-bar-chart"></i>Thống kê hiệu suất</a></li>
+                </ul>
+            </li>
+
+            <!-- Debug & Test (Admin only) -->
+            <li class="nav-item dropdown role-admin">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-bug"></i>
+                    <span>Debug</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/csrf-debug/token"><i class="bi bi-shield-lock"></i>CSRF Token</a></li>
+                    <li><a class="dropdown-item" href="/csrf-debug/test-form"><i class="bi bi-file-earmark-code"></i>Test Form</a></li>
+                    <li><a class="dropdown-item" href="/test-dashboard"><i class="bi bi-speedometer2"></i>Test Dashboard</a></li>
+                    <li><a class="dropdown-item" href="/api/debug/test-password"><i class="bi bi-person-check"></i>Check Auth</a></li>
+                    <li><a class="dropdown-item" href="/force-login"><i class="bi bi-key"></i>Force Login</a></li>
+                </ul>
+            </li>
+
+            <!-- Trợ giúp -->
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-question-circle"></i>
+                    <span>Trợ giúp</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/huong-dan"><i class="bi bi-book"></i>Hướng dẫn sử dụng</a></li>
+                    <li><a class="dropdown-item" href="/video-huong-dan"><i class="bi bi-play-circle"></i>Video hướng dẫn</a></li>
+                    <li><a class="dropdown-item" href="/faq"><i class="bi bi-question-square"></i>Câu hỏi thường gặp</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/lien-he"><i class="bi bi-envelope"></i>Liên hệ hỗ trợ</a></li>
+                    <li><a class="dropdown-item" href="/about"><i class="bi bi-info-circle"></i>Về hệ thống</a></li>
+                </ul>
             </li>
         </ul>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Handle dropdown toggles
-            const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+            // Enhanced dropdown behavior
+            const dropdownElements = document.querySelectorAll('.dropdown-toggle');
+            dropdownElements.forEach(element => {
+                element.addEventListener('show.bs.dropdown', function () {
+                    this.classList.add('show');
+                });
 
-            dropdownToggles.forEach(toggle => {
-                toggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-
-                    const targetId = this.getAttribute('data-target');
-                    const targetMenu = document.getElementById(targetId);
-                    const isCurrentlyShown = targetMenu.classList.contains('show');
-
-                    // Close all other dropdowns
-                    document.querySelectorAll('.top-dropdown-menu.show').forEach(menu => {
-                        if (menu !== targetMenu) {
-                            menu.classList.remove('show');
-                        }
-                    });
-
-                    document.querySelectorAll('.dropdown-toggle.show').forEach(otherToggle => {
-                        if (otherToggle !== this) {
-                            otherToggle.classList.remove('show');
-                        }
-                    });
-
-                    // Toggle current dropdown
-                    if (!isCurrentlyShown) {
-                        targetMenu.classList.add('show');
-                        this.classList.add('show');
-                    } else {
-                        targetMenu.classList.remove('show');
-                        this.classList.remove('show');
-                    }
+                element.addEventListener('hide.bs.dropdown', function () {
+                    this.classList.remove('show');
                 });
             });
 
-            // Close dropdowns when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.top-nav-item')) {
-                    document.querySelectorAll('.top-dropdown-menu.show').forEach(menu => {
-                        menu.classList.remove('show');
-                    });
-                    document.querySelectorAll('.dropdown-toggle.show').forEach(toggle => {
-                        toggle.classList.remove('show');
-                    });
-                }
-            });
-
-            // Handle active menu highlighting
+            // Active menu highlighting
             const currentPath = window.location.pathname;
-            const menuLinks = document.querySelectorAll('.top-nav-link[href], .top-dropdown-item[href]');
+            const menuLinks = document.querySelectorAll('.nav-link[href]');
 
             menuLinks.forEach(link => {
                 if (link.getAttribute('href') === currentPath) {
+                    menuLinks.forEach(l => l.classList.remove('active'));
                     link.classList.add('active');
-
-                    // If this is a dropdown item, also mark parent as active
-                    const parentDropdown = link.closest('.top-dropdown-menu');
-                    if (parentDropdown) {
-                        const parentToggle = document.querySelector(`[data-target="${parentDropdown.id}"]`);
-                        if (parentToggle) {
-                            parentToggle.classList.add('active');
-                        }
-                    }
-                }
-            });
-
-            // Keyboard navigation
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    // Close all dropdowns on Escape
-                    document.querySelectorAll('.top-dropdown-menu.show').forEach(menu => {
-                        menu.classList.remove('show');
-                    });
-                    document.querySelectorAll('.dropdown-toggle.show').forEach(toggle => {
-                        toggle.classList.remove('show');
-                    });
                 }
             });
         });

@@ -27,7 +27,8 @@ public class DataLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
         try {
             taoVaiTroMacDinh();
-            taoNguoiDungMacDinh(); // ✅ ĐỔI TÊN METHOD
+            taoNguoiDungMacDinh();
+            kiemTraPasswordTatCaUser(); // ✅ THÊM: Kiểm tra và sửa password
             log.info("✅ Khởi tạo dữ liệu mặc định thành công!");
         } catch (Exception e) {
             log.error("❌ Lỗi khi khởi tạo dữ liệu mặc định: {}", e.getMessage(), e);
@@ -35,7 +36,7 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void taoVaiTroMacDinh() {
-        // ... existing code unchanged
+        // Existing code unchanged
     }
 
     private void taoNguoiDungMacDinh() {
@@ -61,7 +62,7 @@ public class DataLoader implements CommandLineRunner {
             admin.setThongTinDangNhapHopLe(true);
 
             // ✅ Thêm vai trò ADMIN
-            Optional<VaiTro> adminRole = vaiTroRepository.findByTenVaiTro("ADMIN");
+            Optional<VaiTro> adminRole = vaiTroRepository.findByTenVaiTro("QUAN_TRI_VIEN");
             if (adminRole.isPresent()) {
                 admin.getVaiTroSet().add(adminRole.get());
             }
@@ -72,6 +73,71 @@ public class DataLoader implements CommandLineRunner {
 
         } catch (Exception e) {
             log.error("❌ Lỗi tạo admin: {}", e.getMessage(), e);
+        }
+    }
+
+    // ✅ THÊM: Method mới để kiểm tra và sửa password cho tất cả user
+    private void kiemTraPasswordTatCaUser() {
+        String defaultPassword = "123456";
+        String correctPasswordHash = passwordEncoder.encode(defaultPassword);
+
+        log.info("🔐 Kiểm tra và sửa password cho tất cả user...");
+
+        // Danh sách tất cả username từ migration
+        String[] usernames = {
+                "admin", "hieupho.nguyen", "phong.tran", "duc.le", "mai.pham",
+                "thanh.vo", "hung.dao", "linh.nguyen", "minh.tran", "hoa.le"
+        };
+
+        for (String username : usernames) {
+            try {
+                Optional<NguoiDung> userOpt = nguoiDungRepository.findByTenDangNhap(username);
+                if (userOpt.isPresent()) {
+                    NguoiDung user = userOpt.get();
+
+                    // Kiểm tra password hiện tại có đúng không
+                    if (!passwordEncoder.matches(defaultPassword, user.getMatKhau())) {
+                        // Nếu sai thì cập nhật
+                        user.setMatKhau(passwordEncoder.encode(defaultPassword));
+                        user.setTrangThaiHoatDong(true);
+                        user.setTaiKhoanKhongBiKhoa(true);
+                        user.setTaiKhoanKhongHetHan(true);
+                        user.setThongTinDangNhapHopLe(true);
+                        user.setSoLanDangNhapThatBai(0);
+
+                        nguoiDungRepository.save(user);
+                        log.info("✅ Đã sửa password cho user: {}", username);
+                    } else {
+                        log.info("✅ User {} đã có password đúng", username);
+                    }
+                } else {
+                    log.warn("⚠️ Không tìm thấy user: {}", username);
+                }
+            } catch (Exception e) {
+                log.error("❌ Lỗi khi kiểm tra password cho user {}: {}", username, e.getMessage());
+            }
+        }
+
+        log.info("🔐 Hoàn thành kiểm tra password cho tất cả user");
+    }
+
+    // ✅ THÊM: Method để test password
+    public void testPassword(String username, String password) {
+        try {
+            Optional<NguoiDung> userOpt = nguoiDungRepository.findByTenDangNhap(username);
+            if (userOpt.isPresent()) {
+                NguoiDung user = userOpt.get();
+                boolean matches = passwordEncoder.matches(password, user.getMatKhau());
+                log.info("🔍 Test password cho {}: {} (Hash: {})",
+                        username,
+                        matches ? "✅ ĐÚNG" : "❌ SAI",
+                        user.getMatKhau()
+                );
+            } else {
+                log.warn("⚠️ Không tìm thấy user: {}", username);
+            }
+        } catch (Exception e) {
+            log.error("❌ Lỗi test password: {}", e.getMessage());
         }
     }
 }
