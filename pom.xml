@@ -103,6 +103,12 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
 
+        <!-- pom.xml -->
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        </dependency>
+
         <!-- H2 Database (for testing and development) -->
         <dependency>
             <groupId>com.h2database</groupId>

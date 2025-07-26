@@ -503,3 +503,114 @@ SELECT
 FROM yeu_cau_bao_tri
 GROUP BY trang_thai
 ORDER BY so_luong DESC;
+
+-- =================================================================
+-- BỔ SUNG THÊM VÀO CUỐI FILE V1__Tao_bang_nguoi_dung.sql
+-- Thêm ngay sau dòng cuối cùng của file hiện tại
+-- =================================================================
+
+-- Bổ sung thêm các quyền còn thiếu cho hệ thống
+INSERT INTO quyen (ten_quyen, mo_ta, nhom_quyen, trang_thai_hoat_dong) VALUES
+-- Quyền quản lý người dùng bổ sung
+('QUAN_LY_NGUOI_DUNG_XOA', 'Xóa người dùng', 'NGUOI_DUNG', true),
+('QUAN_LY_VAI_TRO_QUYEN', 'Quản lý vai trò và quyền', 'NGUOI_DUNG', true),
+('RESET_MAT_KHAU', 'Reset mật khẩu người dùng', 'NGUOI_DUNG', true),
+('KHOA_TAI_KHOAN', 'Khóa/mở khóa tài khoản', 'NGUOI_DUNG', true),
+
+-- Quyền quản lý vật tư
+('QUAN_LY_VAT_TU_XEM', 'Xem danh sách vật tư', 'VAT_TU', true),
+('QUAN_LY_VAT_TU_THEM', 'Thêm vật tư mới', 'VAT_TU', true),
+('QUAN_LY_VAT_TU_SUA', 'Sửa thông tin vật tư', 'VAT_TU', true),
+('QUAN_LY_VAT_TU_XOA', 'Xóa vật tư', 'VAT_TU', true),
+('QUAN_LY_KHO_VAT_TU', 'Quản lý kho vật tư', 'VAT_TU', true),
+('NHAP_XUAT_VAT_TU', 'Nhập xuất vật tư', 'VAT_TU', true),
+
+-- Quyền quản lý bảo trì bổ sung
+('TAO_KE_HOACH_BAO_TRI', 'Tạo kế hoạch bảo trì', 'BAO_TRI', true),
+('SUA_KE_HOACH_BAO_TRI', 'Sửa kế hoạch bảo trì', 'BAO_TRI', true),
+('XOA_KE_HOACH_BAO_TRI', 'Xóa kế hoạch bảo trì', 'BAO_TRI', true),
+('PHAN_CONG_BAO_TRI', 'Phân công bảo trì', 'BAO_TRI', true),
+
+-- Quyền quản lý đội bảo trì bổ sung
+('QUAN_LY_DOI_BAO_TRI_XOA', 'Xóa đội bảo trì', 'DOI_BAO_TRI', true),
+('QUAN_LY_THANH_VIEN_DOI', 'Quản lý thành viên đội', 'DOI_BAO_TRI', true),
+
+-- Quyền quản lý báo cáo nâng cao
+('XEM_BAO_CAO_OEE', 'Xem báo cáo OEE', 'BAO_CAO', true),
+('XEM_BAO_CAO_MTBF', 'Xem báo cáo MTBF', 'BAO_CAO', true),
+('XEM_THONG_KE_BAO_TRI', 'Xem thống kê bảo trì', 'BAO_CAO', true),
+('TAO_BAO_CAO_TUY_CHINH', 'Tạo báo cáo tùy chỉnh', 'BAO_CAO', true),
+
+-- Quyền cài đặt hệ thống
+('CAI_DAT_HE_THONG', 'Cài đặt hệ thống', 'HE_THONG', true),
+('CAI_DAT_THONG_SO', 'Cài đặt thông số', 'HE_THONG', true),
+('QUAN_LY_BACKUP', 'Quản lý sao lưu', 'HE_THONG', true),
+('QUAN_LY_LOG', 'Quản lý log hệ thống', 'HE_THONG', true),
+('QUAN_LY_CAU_HINH', 'Quản lý cấu hình', 'HE_THONG', true),
+
+-- Quyền dashboard và thống kê
+('DASHBOARD_ADMIN', 'Xem dashboard admin', 'DASHBOARD', true),
+('THONG_KE_TONG_QUAN', 'Xem thống kê tổng quan', 'DASHBOARD', true),
+('PHAN_TICH_DU_LIEU', 'Phân tích dữ liệu', 'DASHBOARD', true);
+
+-- Bổ sung thêm quyền cho các vai trò có sẵn
+
+-- Thêm quyền vật tư cho TRUONG_PHONG_CSVC
+INSERT INTO vai_tro_quyen (id_vai_tro, id_quyen)
+SELECT vt.id_vai_tro, q.id_quyen
+FROM vai_tro vt, quyen q
+WHERE vt.ten_vai_tro = 'TRUONG_PHONG_CSVC'
+  AND q.ten_quyen IN ('QUAN_LY_VAT_TU_XEM', 'QUAN_LY_VAT_TU_THEM', 'QUAN_LY_VAT_TU_SUA',
+                      'QUAN_LY_KHO_VAT_TU', 'XEM_THONG_KE_BAO_TRI');
+
+-- Thêm quyền vật tư cho NHAN_VIEN_CSVC
+INSERT INTO vai_tro_quyen (id_vai_tro, id_quyen)
+SELECT vt.id_vai_tro, q.id_quyen
+FROM vai_tro vt, quyen q
+WHERE vt.ten_vai_tro = 'NHAN_VIEN_CSVC'
+  AND q.ten_quyen IN ('QUAN_LY_VAT_TU_XEM', 'NHAP_XUAT_VAT_TU');
+
+-- Thêm quyền đội bảo trì cho KY_THUAT_VIEN
+INSERT INTO vai_tro_quyen (id_vai_tro, id_quyen)
+SELECT vt.id_vai_tro, q.id_quyen
+FROM vai_tro vt, quyen q
+WHERE vt.ten_vai_tro = 'KY_THUAT_VIEN'
+  AND q.ten_quyen IN ('QUAN_LY_DOI_BAO_TRI_XEM', 'TAO_KE_HOACH_BAO_TRI');
+
+-- ✅ QUAN TRỌNG: Gán TẤT CẢ quyền mới cho QUAN_TRI_VIEN
+INSERT INTO vai_tro_quyen (id_vai_tro, id_quyen)
+SELECT vt.id_vai_tro, q.id_quyen
+FROM vai_tro vt, quyen q
+WHERE vt.ten_vai_tro = 'QUAN_TRI_VIEN'
+  AND q.id_quyen NOT IN (
+    SELECT DISTINCT vtq.id_quyen
+    FROM vai_tro_quyen vtq
+    WHERE vtq.id_vai_tro = vt.id_vai_tro
+)
+  AND q.trang_thai_hoat_dong = true;
+
+-- Thống kê cuối cùng sau khi bổ sung
+SELECT 'THỐNG KÊ SAU KHI BỔ SUNG QUYỀN' as title;
+
+SELECT
+    'Admin có tổng cộng quyền' as thong_tin,
+    COUNT(DISTINCT q.id_quyen) as so_luong
+FROM nguoi_dung nd
+         JOIN nguoi_dung_vai_tro ndvt ON nd.id_nguoi_dung = ndvt.id_nguoi_dung
+         JOIN vai_tro vt ON ndvt.id_vai_tro = vt.id_vai_tro
+         JOIN vai_tro_quyen vtq ON vt.id_vai_tro = vtq.id_vai_tro
+         JOIN quyen q ON vtq.id_quyen = q.id_quyen
+WHERE nd.ten_dang_nhap = 'admin';
+
+-- Thống kê quyền theo nhóm cho admin
+SELECT
+    q.nhom_quyen,
+    COUNT(*) as so_luong_quyen
+FROM nguoi_dung nd
+         JOIN nguoi_dung_vai_tro ndvt ON nd.id_nguoi_dung = ndvt.id_nguoi_dung
+         JOIN vai_tro vt ON ndvt.id_vai_tro = vt.id_vai_tro
+         JOIN vai_tro_quyen vtq ON vt.id_vai_tro = vtq.id_vai_tro
+         JOIN quyen q ON vtq.id_quyen = q.id_quyen
+WHERE nd.ten_dang_nhap = 'admin'
+GROUP BY q.nhom_quyen
+ORDER BY q.nhom_quyen;
