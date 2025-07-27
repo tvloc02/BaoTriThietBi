@@ -1,7 +1,5 @@
 package com.hethong.baotri.cau_hinh;
 
-import com.hethong.baotri.dto.nguoi_dung.NguoiDungDTO;
-import com.hethong.baotri.dich_vu.nguoi_dung.NguoiDungService;
 import com.hethong.baotri.kho_du_lieu.nguoi_dung.NguoiDungRepository;
 import com.hethong.baotri.kho_du_lieu.nguoi_dung.VaiTroRepository;
 import com.hethong.baotri.thuc_the.nguoi_dung.NguoiDung;
@@ -28,7 +26,6 @@ public class DataLoader implements CommandLineRunner {
         try {
             taoVaiTroMacDinh();
             taoNguoiDungMacDinh();
-            kiemTraPasswordTatCaUser(); // ✅ THÊM: Kiểm tra và sửa password
             log.info("✅ Khởi tạo dữ liệu mặc định thành công!");
         } catch (Exception e) {
             log.error("❌ Lỗi khi khởi tạo dữ liệu mặc định: {}", e.getMessage(), e);
@@ -36,108 +33,93 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void taoVaiTroMacDinh() {
-        // Existing code unchanged
+        // Vai trò đã được tạo trong migration V1
+        log.info("✅ Vai trò đã được tạo từ migration");
     }
 
     private void taoNguoiDungMacDinh() {
-        String username = "admin";
         String defaultPassword = "123456";
 
-        try {
-            // ✅ SỬA: Xóa user cũ nếu có để tránh conflict
-            nguoiDungRepository.findByTenDangNhap(username).ifPresent(existing -> {
-                log.info("Xóa user admin cũ để tạo mới");
-                nguoiDungRepository.delete(existing);
-            });
+        // ✅ Tạo đúng các user đã định nghĩa trong migration V1
 
-            // ✅ Tạo admin mới với password đúng
-            NguoiDung admin = new NguoiDung();
-            admin.setTenDangNhap(username);
-            admin.setMatKhau(passwordEncoder.encode(defaultPassword)); // ✅ Mã hóa đúng
-            admin.setHoVaTen("Admin User");
-            admin.setEmail("admin@test.com");
-            admin.setTrangThaiHoatDong(true);
-            admin.setTaiKhoanKhongBiKhoa(true);
-            admin.setTaiKhoanKhongHetHan(true);
-            admin.setThongTinDangNhapHopLe(true);
-
-            // ✅ Thêm vai trò ADMIN
-            Optional<VaiTro> adminRole = vaiTroRepository.findByTenVaiTro("QUAN_TRI_VIEN");
-            if (adminRole.isPresent()) {
-                admin.getVaiTroSet().add(adminRole.get());
-            }
-
-            NguoiDung saved = nguoiDungRepository.save(admin);
-            log.info("✅ Tạo tài khoản admin thành công! ID: {}", saved.getIdNguoiDung());
-            log.info("📝 Username: {}, Password: {}", username, defaultPassword);
-
-        } catch (Exception e) {
-            log.error("❌ Lỗi tạo admin: {}", e.getMessage(), e);
-        }
-    }
-
-    // ✅ THÊM: Method mới để kiểm tra và sửa password cho tất cả user
-    private void kiemTraPasswordTatCaUser() {
-        String defaultPassword = "123456";
-        String correctPasswordHash = passwordEncoder.encode(defaultPassword);
-
-        log.info("🔐 Kiểm tra và sửa password cho tất cả user...");
-
-        // Danh sách tất cả username từ migration
-        String[] usernames = {
-                "admin", "hieupho.nguyen", "phong.tran", "duc.le", "mai.pham",
-                "thanh.vo", "hung.dao", "linh.nguyen", "minh.tran", "hoa.le"
-        };
-
-        for (String username : usernames) {
-            try {
-                Optional<NguoiDung> userOpt = nguoiDungRepository.findByTenDangNhap(username);
-                if (userOpt.isPresent()) {
-                    NguoiDung user = userOpt.get();
-
-                    // Kiểm tra password hiện tại có đúng không
-                    if (!passwordEncoder.matches(defaultPassword, user.getMatKhau())) {
-                        // Nếu sai thì cập nhật
-                        user.setMatKhau(passwordEncoder.encode(defaultPassword));
-                        user.setTrangThaiHoatDong(true);
-                        user.setTaiKhoanKhongBiKhoa(true);
-                        user.setTaiKhoanKhongHetHan(true);
-                        user.setThongTinDangNhapHopLe(true);
-                        user.setSoLanDangNhapThatBai(0);
-
-                        nguoiDungRepository.save(user);
-                        log.info("✅ Đã sửa password cho user: {}", username);
-                    } else {
-                        log.info("✅ User {} đã có password đúng", username);
-                    }
-                } else {
-                    log.warn("⚠️ Không tìm thấy user: {}", username);
-                }
-            } catch (Exception e) {
-                log.error("❌ Lỗi khi kiểm tra password cho user {}: {}", username, e.getMessage());
-            }
+        // 1. Admin
+        if (!nguoiDungRepository.existsByTenDangNhap("admin")) {
+            taoUser("admin", "Nguyễn Văn Admin", "admin@truonghoc.edu.vn", "0901234567", defaultPassword, "QUAN_TRI_VIEN");
         }
 
-        log.info("🔐 Hoàn thành kiểm tra password cho tất cả user");
+        // 2. Hiệu trưởng
+        if (!nguoiDungRepository.existsByTenDangNhap("hieupho.nguyen")) {
+            taoUser("hieupho.nguyen", "Nguyễn Văn Hiệu", "hieupho@truonghoc.edu.vn", "0901234568", defaultPassword, "HIEU_TRUONG");
+        }
+
+        // 3. Trưởng phòng CSVC
+        if (!nguoiDungRepository.existsByTenDangNhap("phong.tran")) {
+            taoUser("phong.tran", "Trần Thị Phòng", "phongcsvc@truonghoc.edu.vn", "0901234569", defaultPassword, "TRUONG_PHONG_CSVC");
+        }
+
+        // 4-5. Nhân viên CSVC
+        if (!nguoiDungRepository.existsByTenDangNhap("duc.le")) {
+            taoUser("duc.le", "Lê Văn Đức", "duc.csvc@truonghoc.edu.vn", "0901234570", defaultPassword, "NHAN_VIEN_CSVC");
+        }
+
+        if (!nguoiDungRepository.existsByTenDangNhap("mai.pham")) {
+            taoUser("mai.pham", "Phạm Thị Mai", "mai.csvc@truonghoc.edu.vn", "0901234571", defaultPassword, "NHAN_VIEN_CSVC");
+        }
+
+        // 6-7. Kỹ thuật viên
+        if (!nguoiDungRepository.existsByTenDangNhap("thanh.vo")) {
+            taoUser("thanh.vo", "Võ Minh Thành", "thanh.kt@truonghoc.edu.vn", "0901234572", defaultPassword, "KY_THUAT_VIEN");
+        }
+
+        if (!nguoiDungRepository.existsByTenDangNhap("hung.dao")) {
+            taoUser("hung.dao", "Đào Công Hùng", "hung.kt@truonghoc.edu.vn", "0901234573", defaultPassword, "KY_THUAT_VIEN");
+        }
+
+        // 8-10. Giáo viên
+        if (!nguoiDungRepository.existsByTenDangNhap("linh.nguyen")) {
+            taoUser("linh.nguyen", "Nguyễn Thị Linh", "linh.gv@truonghoc.edu.vn", "0901234574", defaultPassword, "GIAO_VIEN");
+        }
+
+        if (!nguoiDungRepository.existsByTenDangNhap("minh.tran")) {
+            taoUser("minh.tran", "Trần Văn Minh", "minh.gv@truonghoc.edu.vn", "0901234575", defaultPassword, "GIAO_VIEN");
+        }
+
+        if (!nguoiDungRepository.existsByTenDangNhap("hoa.le")) {
+            taoUser("hoa.le", "Lê Thị Hoa", "hoa.gv@truonghoc.edu.vn", "0901234576", defaultPassword, "GIAO_VIEN");
+        }
+
+        log.info("📝 Đã tạo 10 user đúng như migration V1, tất cả đều có password: {}", defaultPassword);
     }
 
-    // ✅ THÊM: Method để test password
-    public void testPassword(String username, String password) {
+    private void taoUser(String username, String hoVaTen, String email, String soDienThoai, String password, String vaiTroName) {
         try {
-            Optional<NguoiDung> userOpt = nguoiDungRepository.findByTenDangNhap(username);
-            if (userOpt.isPresent()) {
-                NguoiDung user = userOpt.get();
-                boolean matches = passwordEncoder.matches(password, user.getMatKhau());
-                log.info("🔍 Test password cho {}: {} (Hash: {})",
-                        username,
-                        matches ? "✅ ĐÚNG" : "❌ SAI",
-                        user.getMatKhau()
-                );
+            // Tạo user mới
+            NguoiDung user = new NguoiDung();
+            user.setTenDangNhap(username);
+            user.setMatKhau(passwordEncoder.encode(password)); // ✅ Mã hóa password đúng cách
+            user.setHoVaTen(hoVaTen);
+            user.setEmail(email);
+            user.setSoDienThoai(soDienThoai);
+            user.setTrangThaiHoatDong(true);
+            user.setTaiKhoanKhongBiKhoa(true);
+            user.setTaiKhoanKhongHetHan(true);
+            user.setThongTinDangNhapHopLe(true);
+            user.setSoLanDangNhapThatBai(0);
+
+            // Thêm vai trò
+            Optional<VaiTro> vaiTro = vaiTroRepository.findByTenVaiTro(vaiTroName);
+            if (vaiTro.isPresent()) {
+                user.getVaiTroSet().add(vaiTro.get());
             } else {
-                log.warn("⚠️ Không tìm thấy user: {}", username);
+                log.warn("⚠️ Không tìm thấy vai trò: {}", vaiTroName);
             }
+
+            NguoiDung saved = nguoiDungRepository.save(user);
+            log.info("✅ Tạo user thành công! Username: {} | Password: {} | Role: {}",
+                    username, password, vaiTroName);
+
         } catch (Exception e) {
-            log.error("❌ Lỗi test password: {}", e.getMessage());
+            log.error("❌ Lỗi tạo user {}: {}", username, e.getMessage(), e);
         }
     }
 }

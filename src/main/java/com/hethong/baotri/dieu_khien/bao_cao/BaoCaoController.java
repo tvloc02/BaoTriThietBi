@@ -1,5 +1,5 @@
 package com.hethong.baotri.dieu_khien.bao_cao;
-
+/*
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,3 +54,5 @@ public class BaoCaoController {
         return ResponseEntity.ok(baoCao);
     }
 }
+
+ */

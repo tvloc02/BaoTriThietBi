@@ -1,5 +1,5 @@
 package com.hethong.baotri.dieu_khien.thiet_bi;
-
+/*
 import com.hethong.baotri.dich_vu.thiet_bi.ThietBiService;
 import com.hethong.baotri.thuc_the.thiet_bi.ThietBi;
 import lombok.RequiredArgsConstructor;
@@ -111,3 +111,5 @@ public class ThietBiController {
         return ResponseEntity.ok(trungBinh);
     }
 }
+
+ */

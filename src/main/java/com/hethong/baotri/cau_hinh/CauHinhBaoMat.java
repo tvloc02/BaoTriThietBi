@@ -55,7 +55,7 @@ public class CauHinhBaoMat {  // ✅ Giữ tên class cũ để tránh xung đ�
     public AuthenticationSuccessHandler successHandler() {
         return (request, response, authentication) -> {
             log.info("✅ Đăng nhập thành công cho: {}", authentication.getName());
-            response.sendRedirect("/dashboard");
+            response.sendRedirect("/templates/dashboard");
         };
     }
 

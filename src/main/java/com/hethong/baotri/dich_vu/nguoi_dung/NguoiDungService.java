@@ -230,4 +230,61 @@ public class NguoiDungService {
     public List<Object[]> thongKeNguoiDungTheoVaiTro() {
         return nguoiDungRepository.thongKeNguoiDungTheoVaiTro();
     }
+
+
+    // ✅ THÊM VÀO CUỐI CLASS NguoiDungService.java
+
+    /**
+     * Tìm người dùng theo tên đăng nhập - throw exception nếu không tìm thấy
+     */
+    @Transactional(readOnly = true)
+    public NguoiDungDTO layNguoiDungTheoTenDangNhap(String tenDangNhap) {
+        NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhap(tenDangNhap)
+                .orElseThrow(() -> new NgoaiLeNguoiDung("Không tìm thấy người dùng với tên đăng nhập: " + tenDangNhap));
+        return modelMapper.map(nguoiDung, NguoiDungDTO.class);
+    }
+
+    /**
+     * Đếm tổng số người dùng trong hệ thống
+     */
+    @Transactional(readOnly = true)
+    public long demTongSoNguoiDung() {
+        return nguoiDungRepository.count();
+    }
+
+    /**
+     * Đếm số người dùng đang hoạt động
+     */
+    @Transactional(readOnly = true)
+    public long demNguoiDungHoatDong() {
+        return nguoiDungRepository.countByTrangThaiHoatDong(true);
+    }
+
+    /**
+     * Kiểm tra người dùng có vai trò cụ thể không
+     */
+    @Transactional(readOnly = true)
+    public boolean kiemTraVaiTro(String tenDangNhap, String tenVaiTro) {
+        Optional<NguoiDung> nguoiDungOpt = nguoiDungRepository.findByTenDangNhap(tenDangNhap);
+        if (nguoiDungOpt.isPresent()) {
+            return nguoiDungOpt.get().getVaiTroSet().stream()
+                    .anyMatch(vaiTro -> vaiTro.getTenVaiTro().equals(tenVaiTro));
+        }
+        return false;
+    }
+
+    /**
+     * Lấy danh sách vai trò của người dùng
+     */
+    @Transactional(readOnly = true)
+    public List<String> layDanhSachVaiTro(String tenDangNhap) {
+        Optional<NguoiDung> nguoiDungOpt = nguoiDungRepository.findByTenDangNhap(tenDangNhap);
+        if (nguoiDungOpt.isPresent()) {
+            return nguoiDungOpt.get().getVaiTroSet().stream()
+                    .map(vaiTro -> vaiTro.getTenVaiTro())
+                    .collect(Collectors.toList());
+        }
+        return List.of();
+    }
 }
+
