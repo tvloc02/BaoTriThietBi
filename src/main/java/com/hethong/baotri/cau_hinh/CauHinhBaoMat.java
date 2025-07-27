@@ -3,7 +3,6 @@ package com.hethong.baotri.cau_hinh;
 import com.hethong.baotri.dich_vu.nguoi_dung.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -24,12 +23,12 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 @EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 @Slf4j
-public class CauHinhBaoMat {  // ✅ Giữ tên class cũ để tránh xung đột
+public class CauHinhBaoMat {
 
     private final CustomUserDetailsService userDetailsService;
 
     @Bean
-    @Primary  // ✅ Đảm bảo bean này được ưu tiên
+    @Primary
     public PasswordEncoder passwordEncoder() {
         log.info("🔐 Creating BCryptPasswordEncoder bean");
         return new BCryptPasswordEncoder();
@@ -50,32 +49,41 @@ public class CauHinhBaoMat {  // ✅ Giữ tên class cũ để tránh xung đ�
         return config.getAuthenticationManager();
     }
 
-    // ✅ Simple Success Handler without circular dependency
+    // SUCCESS HANDLER - REDIRECT TO /dashboard
     @Bean
     public AuthenticationSuccessHandler successHandler() {
         return (request, response, authentication) -> {
-            log.info("✅ Đăng nhập thành công cho: {}", authentication.getName());
-            response.sendRedirect("/templates/dashboard");
+            log.info("✅ LOGIN SUCCESS for: {}", authentication.getName());
+            log.info("👤 Authorities: {}", authentication.getAuthorities());
+
+            // REDIRECT TO /dashboard (NOT /templates/dashboard)
+            response.sendRedirect("/dashboard");
         };
     }
 
-    // ✅ Simple Failure Handler without circular dependency
+    // FAILURE HANDLER - REDIRECT TO /login?error=true
     @Bean
     public AuthenticationFailureHandler failureHandler() {
         return (request, response, exception) -> {
-            log.warn("❌ Đăng nhập thất bại: {}", exception.getMessage());
+            log.warn("❌ LOGIN FAILED: {}", exception.getMessage());
+
+            String username = request.getParameter("username");
+            String password = request.getParameter("password");
+            log.warn("📝 Failed login - Username: {}, Password length: {}",
+                    username, password != null ? password.length() : 0);
+
             response.sendRedirect("/login?error=true");
         };
     }
 
     @Bean
-    @Primary  // ✅ Đảm bảo SecurityFilterChain này được ưu tiên
+    @Primary
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         log.info("🔧 Configuring Spring Security FilterChain...");
 
         http
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ Public endpoints
+                        // PUBLIC ENDPOINTS
                         .requestMatchers(
                                 "/",
                                 "/login",
@@ -83,7 +91,7 @@ public class CauHinhBaoMat {  // ✅ Giữ tên class cũ để tránh xung đ�
                                 "/api/auth/test",
                                 "/api/debug/**",
                                 "/debug/**",
-                                "/csrf-debug/**",  // ✅ Thêm endpoint debug CSRF
+                                "/csrf-debug/**",
                                 "/test-dashboard",
                                 "/force-login",
                                 "/check-dashboard",
@@ -94,22 +102,22 @@ public class CauHinhBaoMat {  // ✅ Giữ tên class cũ để tránh xung đ�
                                 "/static/**"
                         ).permitAll()
 
-                        // ✅ All other requests need authentication
+                        // ALL OTHER REQUESTS NEED AUTHENTICATION
                         .anyRequest().authenticated()
                 )
 
-                // ✅ Form login configuration
+                // FORM LOGIN CONFIGURATION
                 .formLogin(form -> form
-                        .loginPage("/login")
-                        .loginProcessingUrl("/perform-login")  // Form action URL
-                        .usernameParameter("username")
-                        .passwordParameter("password")
-                        .successHandler(successHandler())     // Custom success handler
-                        .failureHandler(failureHandler())     // Custom failure handler
+                        .loginPage("/login")                    // Login page URL
+                        .loginProcessingUrl("/perform-login")   // Form action URL
+                        .usernameParameter("username")          // Username field name
+                        .passwordParameter("password")          // Password field name
+                        .successHandler(successHandler())       // Custom success handler
+                        .failureHandler(failureHandler())       // Custom failure handler
                         .permitAll()
                 )
 
-                // ✅ Logout configuration
+                // LOGOUT CONFIGURATION
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout=true")
@@ -119,7 +127,7 @@ public class CauHinhBaoMat {  // ✅ Giữ tên class cũ để tránh xung đ�
                         .permitAll()
                 )
 
-                // ✅ Exception handling
+                // EXCEPTION HANDLING
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             log.warn("🚫 Unauthorized access to: {}", request.getRequestURI());
@@ -127,22 +135,22 @@ public class CauHinhBaoMat {  // ✅ Giữ tên class cũ để tránh xung đ�
                         })
                 )
 
-                // ✅ Session management
+                // SESSION MANAGEMENT
                 .sessionManagement(session -> session
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
                         .expiredUrl("/login?expired=true")
                 )
 
-                // ✅ CSRF protection - CHỈ disable cho API endpoints
+                // CSRF PROTECTION - DISABLE ONLY FOR API ENDPOINTS
                 .csrf(csrf -> csrf
                                 .ignoringRequestMatchers(
                                         "/api/auth/**",
                                         "/api/debug/**",
                                         "/debug/**",
-                                        "/h2-console/**"  // Nếu dùng H2 database
+                                        "/h2-console/**"
                                 )
-                        // ✅ QUAN TRỌNG: Không disable CSRF cho /perform-login
+                        // CSRF ENABLED FOR /perform-login (FORM SUBMIT)
                 );
 
         log.info("✅ Spring Security configuration completed");

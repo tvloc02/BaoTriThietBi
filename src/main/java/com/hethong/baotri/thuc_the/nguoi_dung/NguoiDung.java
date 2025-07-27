@@ -99,7 +99,7 @@ public class NguoiDung implements UserDetails {
     private LocalDateTime thoiGianKhoaTaiKhoan;
 
     // Quan hệ Many-to-Many với VaiTro
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "nguoi_dung_vai_tro",
             joinColumns = @JoinColumn(name = "id_nguoi_dung"),

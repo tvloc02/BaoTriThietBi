@@ -4,6 +4,7 @@ import com.hethong.baotri.thuc_the.nguoi_dung.NguoiDung;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -50,6 +51,14 @@ public interface NguoiDungRepository extends JpaRepository<NguoiDung, Long> {
 
 
     Page<NguoiDung> findBySoLanDangNhapThatBaiGreaterThan(Integer soLan, Pageable pageable);
+
+    @Modifying
+    @Query(value = "DELETE FROM nguoi_dung_vai_tro WHERE id_nguoi_dung = ?1", nativeQuery = true)
+    void deleteUserRoles(Long userId);
+
+    @Modifying
+    @Query(value = "INSERT INTO nguoi_dung_vai_tro (id_nguoi_dung, id_vai_tro) VALUES (?1, ?2)", nativeQuery = true)
+    void insertUserRole(Long userId, Long roleId);
 
 
     @Query("SELECT nd FROM NguoiDung nd WHERE " +

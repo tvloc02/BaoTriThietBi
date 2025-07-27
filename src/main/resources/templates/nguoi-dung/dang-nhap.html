@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,8 +18,6 @@
             --secondary-purple: #A855F7;
             --light-purple: #EDE9FE;
             --ocean-blue: #0EA5E9;
-            --purple-gradient-start: #8B5CF6;
-            --purple-gradient-end: #EC4899;
             --orange: #F59E0B;
             --red: #EF4444;
             --green: #10B981;
@@ -242,39 +240,6 @@
             font-size: 1rem;
         }
 
-        .google-btn {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid var(--border-light);
-            border-radius: 12px;
-            background: white;
-            color: var(--text-primary);
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-            text-decoration: none;
-        }
-
-        .google-btn:hover {
-            border-color: var(--primary-purple);
-            color: var(--text-primary);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-
-        .google-icon {
-            width: 20px;
-            height: 20px;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="%23FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="%23FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="%23FFF" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="%234CAF50" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>') no-repeat center;
-            background-size: contain;
-        }
-
         .divider {
             text-align: center;
             margin: 1.5rem 0;
@@ -423,151 +388,30 @@
             color: var(--secondary-purple);
         }
 
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .social-link {
-            width: 44px;
-            height: 44px;
+        /* Alert styles */
+        .alert {
             border-radius: 12px;
-            background: var(--bg-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-size: 1.1rem;
-        }
-
-        .social-link:hover {
-            background: var(--primary-purple);
-            color: white;
-            transform: translateY(-3px);
-        }
-
-        /* Flash notification styles - positioned at top left */
-        .flash-notification {
-            position: fixed;
-            top: -100px;
-            left: 20px;
-            background: white;
-            border-radius: 16px;
-            padding: 1.25rem 1.5rem;
-            box-shadow: var(--shadow-xl);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            z-index: 9999;
-            min-width: 350px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border-left: 4px solid var(--red);
-        }
-
-        .flash-notification.show {
-            top: 20px;
-            animation: slideInBounce 0.6s ease-out;
-        }
-
-        .flash-notification.hide {
-            top: -100px;
-            opacity: 0;
-        }
-
-        .flash-notification.success {
-            border-left-color: var(--green);
-        }
-
-        .flash-notification.error {
-            border-left-color: var(--red);
-        }
-
-        .flash-notification.warning {
-            border-left-color: var(--orange);
-        }
-
-        .flash-icon {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
-
-        .flash-icon.success {
-            background: var(--green);
-        }
-
-        .flash-icon.error {
-            background: var(--red);
-        }
-
-        .flash-icon.warning {
-            background: var(--orange);
-        }
-
-        .flash-content {
-            flex: 1;
-        }
-
-        .flash-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-            font-size: 0.95rem;
-        }
-
-        .flash-message {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            line-height: 1.4;
-        }
-
-        .flash-close {
-            background: none;
+            padding: 1rem;
+            margin-bottom: 1rem;
             border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
-        .flash-close:hover {
-            background: var(--bg-primary);
-            color: var(--text-primary);
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #DC2626;
+            border-left: 4px solid #DC2626;
         }
 
-        @keyframes slideInBounce {
-            0% {
-                transform: translateX(-100%) scale(0.8);
-                opacity: 0;
-            }
-            60% {
-                transform: translateX(10px) scale(1.05);
-                opacity: 1;
-            }
-            100% {
-                transform: translateX(0) scale(1);
-                opacity: 1;
-            }
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border-left: 4px solid #059669;
         }
 
         /* Loading animation */
-        .loading {
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
         .spinner {
             display: inline-block;
             width: 20px;
@@ -607,12 +451,6 @@
             .form-header h1 {
                 font-size: 1.8rem;
             }
-
-            .flash-notification {
-                left: 10px;
-                right: 10px;
-                min-width: auto;
-            }
         }
 
         @media (max-width: 480px) {
@@ -628,14 +466,6 @@
 
             .login-form {
                 max-width: 100%;
-            }
-        }
-
-        /* Particle animation styles */
-        @keyframes particleFloat {
-            to {
-                transform: translateY(-100vh) rotate(360deg);
-                opacity: 0;
             }
         }
     </style>
@@ -661,78 +491,64 @@
     </div>
 
     <div class="right-section">
-        <form class="login-form" id="loginForm">
+        <!-- FORM SPRING BOOT - SỬA LỖI HOÀN TOÀN -->
+        <form class="login-form" action="/perform-login" method="post" id="loginForm">
+            <!-- CSRF Token -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
             <div class="form-header">
                 <h1>Đăng nhập</h1>
                 <p>Vui lòng đăng nhập để tiếp tục</p>
             </div>
 
-            <!-- Google Login Button -->
-            <a href="#" class="google-btn" id="googleLogin">
-                <div class="google-icon"></div>
-                <span>Đăng nhập với Google</span>
-            </a>
-
-            <!-- Divider -->
-            <div class="divider">
-                <span>Hoặc</span>
+            <!-- Server Messages -->
+            <div th:if="${param.error}" class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle"></i>
+                <span th:text="${errorMessage} ?: 'Tên đăng nhập hoặc mật khẩu không đúng!'"></span>
             </div>
 
-            <!-- Login Form -->
+            <div th:if="${param.logout}" class="alert alert-success">
+                <i class="bi bi-check-circle"></i>
+                <span th:text="${logoutMessage} ?: 'Đăng xuất thành công!'"></span>
+            </div>
+
+            <!-- Demo User Info -->
+            <div class="alert" style="background: rgba(59, 130, 246, 0.1); color: #1E40AF; border-left: 4px solid #3B82F6;">
+                <i class="bi bi-info-circle"></i>
+                <div>
+                    <strong>Demo:</strong> admin/123456 | hieupho.nguyen/123456 | phong.tran/123456
+                </div>
+            </div>
+
+            <!-- Login Fields -->
             <div class="form-group">
                 <label for="username">Tên đăng nhập</label>
-                <input type="text" id="username" name="username" class="form-input" placeholder="Nhập tên đăng nhập của bạn" value="admin" required>
+                <input type="text" id="username" name="username" class="form-input"
+                       placeholder="Nhập tên đăng nhập của bạn" value="admin" required>
             </div>
 
             <div class="form-group">
                 <label for="password">Mật khẩu</label>
                 <div class="password-wrapper">
-                    <input type="password" id="password" name="password" class="form-input" placeholder="Nhập mật khẩu của bạn" value="123456" required>
+                    <input type="password" id="password" name="password" class="form-input"
+                           placeholder="Nhập mật khẩu của bạn" value="123456" required>
                     <button type="button" class="password-toggle" id="passwordToggle">
                         <i class="bi bi-eye"></i>
                     </button>
                 </div>
             </div>
 
+            <!-- Submit Button -->
             <button type="submit" class="login-btn" id="loginBtn">
                 <span class="btn-text">Đăng nhập</span>
                 <div class="spinner" style="display: none;"></div>
             </button>
 
             <div class="footer-links">
-                <a href="#" id="forgotPassword">Quên mật khẩu?</a>
-            </div>
-
-            <div class="social-links">
-                <a href="#" class="social-link" title="Email">
-                    <i class="bi bi-envelope"></i>
-                </a>
-                <a href="#" class="social-link" title="Website">
-                    <i class="bi bi-chat-dots"></i>
-                </a>
-                <a href="#" class="social-link" title="Hỗ trợ">
-                    <i class="bi bi-telephone"></i>
-                </a>
-                <a href="#" class="social-link" title="LinkedIn">
-                    <i class="bi bi-linkedin"></i>
-                </a>
+                <a href="#" onclick="alert('Liên hệ quản trị viên để đặt lại mật khẩu')">Quên mật khẩu?</a>
             </div>
         </form>
     </div>
-</div>
-
-<!-- Flash Notification Template -->
-<div class="flash-notification" id="flashNotification" style="display: none;">
-    <div class="flash-icon">
-        <i class="bi bi-exclamation-triangle"></i>
-    </div>
-    <div class="flash-content">
-        <div class="flash-title">Đăng nhập thất bại</div>
-        <div class="flash-message">Tên đăng nhập hoặc mật khẩu không chính xác</div>
-    </div>
-    <button class="flash-close">
-        <i class="bi bi-x"></i>
-    </button>
 </div>
 
 <!-- Bootstrap JS -->
@@ -746,17 +562,8 @@
         const loading = loginBtn.querySelector('.spinner');
         const passwordToggle = document.getElementById('passwordToggle');
         const passwordInput = document.getElementById('password');
-        const flashNotification = document.getElementById('flashNotification');
 
-        // Correct credentials
-        const validCredentials = {
-            'admin': '123456',
-            'manager': 'manager123',
-            'technician': 'tech123',
-            'user': 'user123'
-        };
-
-        // Password toggle functionality
+        // Password toggle
         passwordToggle.addEventListener('click', function() {
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
@@ -766,178 +573,46 @@
             icon.classList.toggle('bi-eye-slash');
         });
 
-        // Flash notification system
-        function showFlashNotification(type, title, message) {
-            const flash = flashNotification;
-            const icon = flash.querySelector('.flash-icon i');
-            const titleEl = flash.querySelector('.flash-title');
-            const messageEl = flash.querySelector('.flash-message');
-            const iconContainer = flash.querySelector('.flash-icon');
-
-            // Reset classes
-            flash.className = 'flash-notification';
-            iconContainer.className = 'flash-icon';
-
-            // Set type
-            flash.classList.add(type);
-            iconContainer.classList.add(type);
-
-            // Set icon based on type
-            icon.className = type === 'success' ? 'bi bi-check' :
-                type === 'warning' ? 'bi bi-exclamation-triangle' :
-                    'bi bi-x-circle';
-
-            // Set content
-            titleEl.textContent = title;
-            messageEl.textContent = message;
-
-            // Show notification
-            flash.style.display = 'flex';
-            setTimeout(() => {
-                flash.classList.add('show');
-            }, 10);
-
-            // Auto hide after 5 seconds
-            setTimeout(() => {
-                hideFlashNotification();
-            }, 5000);
-        }
-
-        function hideFlashNotification() {
-            flashNotification.classList.remove('show');
-            flashNotification.classList.add('hide');
-
-            setTimeout(() => {
-                flashNotification.style.display = 'none';
-                flashNotification.classList.remove('hide');
-            }, 400);
-        }
-
         function setLoading(isLoading) {
             if (isLoading) {
                 loginBtn.disabled = true;
                 btnText.style.display = 'none';
                 loading.style.display = 'inline-block';
-                loginForm.classList.add('loading');
             } else {
                 loginBtn.disabled = false;
                 btnText.style.display = 'inline';
                 loading.style.display = 'none';
-                loginForm.classList.remove('loading');
             }
         }
 
-        // Close button functionality
-        flashNotification.querySelector('.flash-close').addEventListener('click', hideFlashNotification);
-
-        // Form submission
+        // Form submit - CHỈ HIỂN THỊ LOADING, KHÔNG BLOCK SUBMIT
         loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
 
             if (!username || !password) {
-                showFlashNotification('warning', 'Thông tin thiếu', 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu');
+                e.preventDefault();
+                alert('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu');
                 return;
             }
 
-            // Show loading
+            // Hiển thị loading
             setLoading(true);
 
-            // Simulate authentication delay
-            setTimeout(() => {
-                // Check credentials
-                if (validCredentials[username] && validCredentials[username] === password) {
-                    showFlashNotification('success', 'Đăng nhập thành công', 'Chào mừng bạn quay trở lại hệ thống!');
-
-                    setTimeout(() => {
-                        // Redirect to dashboard (simulate)
-                        window.location.href = '/dashboard';
-                    }, 2000);
-                } else {
-                    showFlashNotification('error', 'Đăng nhập thất bại', 'Tên đăng nhập hoặc mật khẩu không chính xác');
-
-                    // Reset button
-                    setLoading(false);
-
-                    // Shake form slightly
-                    loginForm.style.animation = 'shake 0.5s ease-in-out';
-                    setTimeout(() => {
-                        loginForm.style.animation = '';
-                    }, 500);
-                }
-            }, 1800);
+            // ĐỂ FORM SUBMIT TỰ NHIÊN VỀ SPRING SECURITY
+            console.log('🔐 Submitting to Spring Security at /perform-login');
         });
 
-        // Google login
-        document.getElementById('googleLogin').addEventListener('click', function(e) {
-            e.preventDefault();
-            showFlashNotification('warning', 'Tính năng đang phát triển', 'Đăng nhập Google sẽ được cập nhật trong phiên bản tiếp theo');
-        });
-
-        // Forgot password
-        document.getElementById('forgotPassword').addEventListener('click', function(e) {
-            e.preventDefault();
-            showFlashNotification('success', 'Liên hệ quản trị viên', 'Vui lòng liên hệ quản trị viên để đặt lại mật khẩu qua email hoặc hotline');
-        });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.ctrlKey && !e.altKey) {
-                if (document.activeElement.tagName !== 'BUTTON') {
-                    e.preventDefault();
-                    loginForm.dispatchEvent(new Event('submit'));
-                }
-            }
-        });
-
-        // Auto-focus username field
+        // Auto-focus
         setTimeout(() => {
             document.getElementById('username').focus();
         }, 500);
 
-        // Add shake animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-8px); }
-                75% { transform: translateX(8px); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Particle effect
-        function createParticle() {
-            const particle = document.createElement('div');
-            particle.style.cssText = `
-                position: absolute;
-                width: 4px;
-                height: 4px;
-                background: rgba(255, 255, 255, 0.6);
-                border-radius: 50%;
-                pointer-events: none;
-                z-index: 0;
-                animation: particleFloat 8s linear infinite;
-                left: ${Math.random() * 100}%;
-                top: 100%;
-            `;
-
-            document.body.appendChild(particle);
-
-            setTimeout(() => {
-                particle.remove();
-            }, 8000);
-        }
-
-        // Create particle every 3 seconds
-        setInterval(createParticle, 3000);
-
-        // Demo credentials info (remove in production)
-        console.log('🔐 Demo Credentials:');
-        console.table(validCredentials);
-        console.log('💡 Tip: Use admin/123456 for quick login');
+        console.log('🔐 Login Form Ready');
+        console.log('📋 Demo Accounts:');
+        console.log('👤 admin/123456 (Quản trị viên)');
+        console.log('👤 hieupho.nguyen/123456 (Hiệu trưởng)');
+        console.log('👤 phong.tran/123456 (Trưởng phòng CSVC)');
     });
 </script>
 </body>

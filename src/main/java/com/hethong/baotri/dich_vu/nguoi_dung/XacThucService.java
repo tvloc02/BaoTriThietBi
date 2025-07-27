@@ -4,7 +4,6 @@ import com.hethong.baotri.kho_du_lieu.nguoi_dung.NguoiDungRepository;
 import com.hethong.baotri.thuc_the.nguoi_dung.NguoiDung;
 import com.hethong.baotri.tien_ich.JwtTokenUtil;
 import com.hethong.baotri.ngoai_le.NgoaiLeNguoiDung;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -19,7 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
