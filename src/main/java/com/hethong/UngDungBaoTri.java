@@ -1,48 +1,43 @@
 package com.hethong;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.env.Environment;
 
-/**
- * Lớp chính khởi động ứng dụng hệ thống quản lý bảo trì thiết bị
- *
- * @author Đội phát triển hệ thống bảo trì
- * @version 1.0
- */
-@SpringBootApplication(scanBasePackages = "com.hethong.baotri")
-@EnableJpaRepositories(basePackages = "com.hethong.baotri.kho_du_lieu")
-@EntityScan(basePackages = "com.hethong.baotri.thuc_the")
-@EnableTransactionManagement
-@EnableScheduling
+@SpringBootApplication
+@Slf4j
 public class UngDungBaoTri {
 
     public static void main(String[] args) {
+        System.setProperty("spring.profiles.active", "dev");
         SpringApplication.run(UngDungBaoTri.class, args);
-        System.out.println("=== HỆ THỐNG QUẢN LÝ BẢO TRÌ THIẾT BỊ ===");
-        System.out.println("Ứng dụng đã khởi động thành công!");
-        System.out.println("Đăng nhập: http://localhost:8081/");
-        System.out.println("Trang chủ: http://localhost:8081/trang-chu");
-        System.out.println("API Test:  http://localhost:8081/api/test/hello");
-        System.out.println("API Trang chủ: http://localhost:8081/api/trang-chu/thong-ke-tong-quan");
-        System.out.println("Database: SQL Server (lov:1433)");
-        System.out.println("Demo Login: admin / 123456");
-        System.out.println("========================================");
     }
 
-    @Bean
-    public ModelMapper modelMapper() {
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration()
-                .setFieldMatchingEnabled(true)
-                .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE)
-                .setMatchingStrategy(MatchingStrategies.STRICT);
-        return mapper;
+    @EventListener(ApplicationReadyEvent.class)
+    public void onApplicationReady(ApplicationReadyEvent event) {
+        Environment env = event.getApplicationContext().getEnvironment();
+        String port = env.getProperty("server.port", "8081");
+        String profile = env.getProperty("spring.profiles.active", "default");
+
+        log.info("=================================================================");
+        log.info("🚀 HỆ THỐNG QUẢN LÝ BẢO TRÌ THIẾT BỊ ĐÃ KHỞI ĐỘNG THÀNH CÔNG!");
+        log.info("=================================================================");
+        log.info("🌐 URL ứng dụng: http://localhost:{}", port);
+        log.info("🔐 Trang đăng nhập: http://localhost:{}/login", port);
+        log.info("📊 Dashboard: http://localhost:{}/dashboard", port);
+        log.info("🔧 Test API: http://localhost:{}/api/debug/db-info", port);
+        log.info("📝 Profile hiện tại: {}", profile);
+        log.info("=================================================================");
+        log.info("📋 THÔNG TIN ĐĂNG NHẬP:");
+        log.info("   👤 Admin: admin / 123456");
+        log.info("   👤 Hiệu trưởng: hieupho.nguyen / 123456");
+        log.info("   👤 TP CSVC: phong.tran / 123456");
+        log.info("   👤 NV CSVC: duc.le / 123456");
+        log.info("   👤 Kỹ thuật viên: thanh.vo / 123456");
+        log.info("   👤 Giáo viên: linh.nguyen / 123456");
+        log.info("=================================================================");
     }
 }

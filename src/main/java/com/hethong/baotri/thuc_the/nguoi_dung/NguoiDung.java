@@ -1,11 +1,13 @@
 package com.hethong.baotri.thuc_the.nguoi_dung;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.slf4j.Logger;
@@ -31,12 +33,16 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"matKhau", "vaiTroSet"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true) // ✅ CHỈ SỬ DỤNG ID
+@ToString(exclude = {"matKhau", "vaiTroSet", "doiBaoTri"}) // ✅ LOẠI BỎ circular references
 public class NguoiDung implements UserDetails {
+
+    private static final Logger log = LoggerFactory.getLogger(NguoiDung.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_nguoi_dung")
+    @EqualsAndHashCode.Include // ✅ CHỈ SỬ DỤNG ID cho equals/hashCode
     private Long idNguoiDung;
 
     // Thêm alias getId()
@@ -52,6 +58,7 @@ public class NguoiDung implements UserDetails {
     @NotBlank(message = "Mật khẩu không được để trống")
     @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     @Column(name = "mat_khau", nullable = false)
+    @JsonIgnore // ✅ KHÔNG trả về password trong JSON
     private String matKhau;
 
     @NotBlank(message = "Họ và tên không được để trống")
@@ -98,8 +105,8 @@ public class NguoiDung implements UserDetails {
     @Column(name = "thoi_gian_khoa_tai_khoan")
     private LocalDateTime thoiGianKhoaTaiKhoan;
 
-    // Quan hệ Many-to-Many với VaiTro
-    @ManyToMany(fetch = FetchType.EAGER)
+    // ✅ Quan hệ Many-to-Many với VaiTro - SỬA ĐỂ TRÁNH CIRCULAR REFERENCE
+    @ManyToMany(fetch = FetchType.LAZY) // ✅ ĐỔI THÀNH LAZY
     @JoinTable(
             name = "nguoi_dung_vai_tro",
             joinColumns = @JoinColumn(name = "id_nguoi_dung"),
@@ -107,9 +114,10 @@ public class NguoiDung implements UserDetails {
     )
     private Set<VaiTro> vaiTroSet = new HashSet<>();
 
-    // Quan hệ với DoiBaoTri
+    // ✅ Quan hệ với DoiBaoTri
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_doi_bao_tri")
+    @JsonIgnore // ✅ TRÁNH JSON circular reference
     private com.hethong.baotri.thuc_the.doi_bao_tri.DoiBaoTri doiBaoTri;
 
     @PrePersist
@@ -123,20 +131,24 @@ public class NguoiDung implements UserDetails {
         ngayCapNhat = LocalDateTime.now();
     }
 
-
+    // ✅ HELPER METHODS - KHÔNG SỬ DỤNG RELATIONSHIPS TRỰC TIẾP
     public void themVaiTro(VaiTro vaiTro) {
+        if (this.vaiTroSet == null) {
+            this.vaiTroSet = new HashSet<>();
+        }
         this.vaiTroSet.add(vaiTro);
-        vaiTro.getNguoiDungSet().add(this);
+        // ✅ KHÔNG gọi vaiTro.getNguoiDungSet().add(this) để tránh circular reference
     }
-
 
     public void xoaVaiTro(VaiTro vaiTro) {
-        this.vaiTroSet.remove(vaiTro);
-        vaiTro.getNguoiDungSet().remove(this);
+        if (this.vaiTroSet != null) {
+            this.vaiTroSet.remove(vaiTro);
+        }
+        // ✅ KHÔNG gọi vaiTro.getNguoiDungSet().remove(this) để tránh circular reference
     }
 
-
     public boolean coVaiTro(String tenVaiTro) {
+        if (vaiTroSet == null) return false;
         return vaiTroSet.stream()
                 .anyMatch(vaiTro -> vaiTro.getTenVaiTro().equals(tenVaiTro));
     }
@@ -168,29 +180,39 @@ public class NguoiDung implements UserDetails {
         this.soLanDangNhapThatBai = 0;
         this.thoiGianKhoaTaiKhoan = null;
     }
-    private static final Logger log = LoggerFactory.getLogger(NguoiDung.class);
-    // Implement UserDetails interface
+
+    // ✅ IMPLEMENT UserDetails interface - SỬA ĐỂ TRÁNH LAZY LOADING ISSUES
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();
 
-        if (vaiTroSet != null) {
-            for (VaiTro vaiTro : vaiTroSet) {
-                authorities.add(new SimpleGrantedAuthority("ROLE_" + vaiTro.getTenVaiTro()));
+        try {
+            if (vaiTroSet != null) {
+                for (VaiTro vaiTro : vaiTroSet) {
+                    // Thêm ROLE_
+                    authorities.add(new SimpleGrantedAuthority("ROLE_" + vaiTro.getTenVaiTro()));
 
-                if (vaiTro.getQuyenSet() != null) {
-                    for (Quyen quyen : vaiTro.getQuyenSet()) {
-                        authorities.add(new SimpleGrantedAuthority(quyen.getTenQuyen()));
+                    // ✅ SỬA: Kiểm tra null và tránh lazy loading issues
+                    try {
+                        if (vaiTro.getQuyenSet() != null) {
+                            for (Quyen quyen : vaiTro.getQuyenSet()) {
+                                authorities.add(new SimpleGrantedAuthority(quyen.getTenQuyen()));
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.warn("⚠️ Cannot load quyenSet for vaiTro: {}, error: {}",
+                                vaiTro.getTenVaiTro(), e.getMessage());
                     }
                 }
             }
+        } catch (Exception e) {
+            log.error("❌ Error loading authorities for user: {}, error: {}",
+                    tenDangNhap, e.getMessage());
         }
-
 
         log.debug("User {} has authorities: {}", tenDangNhap, authorities);
         return authorities;
     }
-
 
     @Override
     public String getPassword() {
@@ -204,7 +226,7 @@ public class NguoiDung implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return this.taiKhoanKhongHetHan;
+        return Boolean.TRUE.equals(this.taiKhoanKhongHetHan);
     }
 
     @Override
@@ -212,16 +234,25 @@ public class NguoiDung implements UserDetails {
         if (thoiGianKhoaTaiKhoan != null && thoiGianKhoaTaiKhoan.isAfter(LocalDateTime.now())) {
             return false;
         }
-        return this.taiKhoanKhongBiKhoa;
+        return Boolean.TRUE.equals(this.taiKhoanKhongBiKhoa);
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return this.thongTinDangNhapHopLe;
+        return Boolean.TRUE.equals(this.thongTinDangNhapHopLe);
     }
 
     @Override
     public boolean isEnabled() {
-        return this.trangThaiHoatDong;
+        return Boolean.TRUE.equals(this.trangThaiHoatDong);
+    }
+
+    // ✅ HELPER METHODS
+    public boolean isActive() {
+        return Boolean.TRUE.equals(trangThaiHoatDong);
+    }
+
+    public boolean isLocked() {
+        return Boolean.FALSE.equals(taiKhoanKhongBiKhoa);
     }
 }

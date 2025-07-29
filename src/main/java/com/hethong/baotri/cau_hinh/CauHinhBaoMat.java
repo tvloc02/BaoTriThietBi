@@ -49,19 +49,20 @@ public class CauHinhBaoMat {
         return config.getAuthenticationManager();
     }
 
-    // SUCCESS HANDLER - REDIRECT TO /dashboard
     @Bean
     public AuthenticationSuccessHandler successHandler() {
         return (request, response, authentication) -> {
             log.info("✅ LOGIN SUCCESS for: {}", authentication.getName());
             log.info("👤 Authorities: {}", authentication.getAuthorities());
 
-            // REDIRECT TO /dashboard (NOT /templates/dashboard)
+            String username = authentication.getName();
+            log.info("🔐 Successful login - User: {} - Redirecting to dashboard", username);
+
+            // ✅ REDIRECT TO DASHBOARD (FIXED URL)
             response.sendRedirect("/dashboard");
         };
     }
 
-    // FAILURE HANDLER - REDIRECT TO /login?error=true
     @Bean
     public AuthenticationFailureHandler failureHandler() {
         return (request, response, exception) -> {
@@ -69,9 +70,10 @@ public class CauHinhBaoMat {
 
             String username = request.getParameter("username");
             String password = request.getParameter("password");
-            log.warn("📝 Failed login - Username: {}, Password length: {}",
-                    username, password != null ? password.length() : 0);
+            log.warn("📝 Failed login attempt - Username: {}, Password provided: {}",
+                    username, password != null && !password.isEmpty() ? "YES" : "NO");
 
+            // ✅ REDIRECT BACK TO LOGIN WITH ERROR
             response.sendRedirect("/login?error=true");
         };
     }
@@ -83,41 +85,40 @@ public class CauHinhBaoMat {
 
         http
                 .authorizeHttpRequests(auth -> auth
-                        // PUBLIC ENDPOINTS
+                        // ✅ PUBLIC ENDPOINTS
                         .requestMatchers(
-                                "/",
                                 "/login",
                                 "/error",
-                                "/api/auth/test",
                                 "/api/debug/**",
-                                "/debug/**",
-                                "/csrf-debug/**",
-                                "/test-dashboard",
-                                "/force-login",
-                                "/check-dashboard",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
                                 "/favicon.ico",
-                                "/static/**"
+                                "/static/**",
+                                "/webjars/**",
+                                "/access-denied",
+                                "/hybridaction/**" // Ignore browser extension requests
                         ).permitAll()
 
-                        // ALL OTHER REQUESTS NEED AUTHENTICATION
+                        // ✅ ROOT PATH REDIRECT
+                        .requestMatchers("/").permitAll()
+
+                        // ✅ ALL OTHER REQUESTS NEED AUTHENTICATION
                         .anyRequest().authenticated()
                 )
 
-                // FORM LOGIN CONFIGURATION
+                // ✅ FORM LOGIN CONFIGURATION (FIXED)
                 .formLogin(form -> form
-                        .loginPage("/login")                    // Login page URL
-                        .loginProcessingUrl("/perform-login")   // Form action URL
-                        .usernameParameter("username")          // Username field name
-                        .passwordParameter("password")          // Password field name
-                        .successHandler(successHandler())       // Custom success handler
-                        .failureHandler(failureHandler())       // Custom failure handler
+                        .loginPage("/login")
+                        .loginProcessingUrl("/perform_login") // ✅ FIXED: Use underscore instead of hyphen
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .successHandler(successHandler())
+                        .failureHandler(failureHandler())
                         .permitAll()
                 )
 
-                // LOGOUT CONFIGURATION
+                // ✅ LOGOUT CONFIGURATION
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout=true")
@@ -127,30 +128,35 @@ public class CauHinhBaoMat {
                         .permitAll()
                 )
 
-                // EXCEPTION HANDLING
+                // ✅ EXCEPTION HANDLING
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
-                            log.warn("🚫 Unauthorized access to: {}", request.getRequestURI());
+                            log.warn("🚫 Unauthorized access to: {} from IP: {}",
+                                    request.getRequestURI(),
+                                    request.getRemoteAddr());
                             response.sendRedirect("/login");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            log.warn("🚫 Access denied to: {} for user: {}",
+                                    request.getRequestURI(),
+                                    request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "anonymous");
+                            response.sendRedirect("/access-denied");
                         })
                 )
 
-                // SESSION MANAGEMENT
+                // ✅ SESSION MANAGEMENT
                 .sessionManagement(session -> session
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
                         .expiredUrl("/login?expired=true")
                 )
 
-                // CSRF PROTECTION - DISABLE ONLY FOR API ENDPOINTS
+                // ✅ CSRF PROTECTION
                 .csrf(csrf -> csrf
-                                .ignoringRequestMatchers(
-                                        "/api/auth/**",
-                                        "/api/debug/**",
-                                        "/debug/**",
-                                        "/h2-console/**"
-                                )
-                        // CSRF ENABLED FOR /perform-login (FORM SUBMIT)
+                        .ignoringRequestMatchers(
+                                "/api/**",
+                                "/debug/**"
+                        )
                 );
 
         log.info("✅ Spring Security configuration completed");

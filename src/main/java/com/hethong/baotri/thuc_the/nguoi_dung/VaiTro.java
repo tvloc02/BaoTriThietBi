@@ -1,10 +1,12 @@
 package com.hethong.baotri.thuc_the.nguoi_dung;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
@@ -23,12 +25,14 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"nguoiDungSet", "quyenSet"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true) // ✅ CHỈ SỬ DỤNG ID
+@ToString(exclude = {"nguoiDungSet", "quyenSet"}) // ✅ LOẠI BỎ circular references
 public class VaiTro {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_vai_tro")
+    @EqualsAndHashCode.Include // ✅ CHỈ SỬ DỤNG ID cho equals/hashCode
     private Long idVaiTro;
 
     // Thêm alias getId()
@@ -54,11 +58,12 @@ public class VaiTro {
     @Column(name = "trang_thai_hoat_dong", nullable = false)
     private Boolean trangThaiHoatDong = true;
 
-    // Quan hệ Many-to-Many với NguoiDung
+    // ✅ Quan hệ Many-to-Many với NguoiDung - TRÁNH CIRCULAR REFERENCE
     @ManyToMany(mappedBy = "vaiTroSet", fetch = FetchType.LAZY)
+    @JsonIgnore // ✅ QUAN TRỌNG: Tránh JSON serialization loop
     private Set<NguoiDung> nguoiDungSet = new HashSet<>();
 
-    // Quan hệ Many-to-Many với Quyen
+    // ✅ Quan hệ Many-to-Many với Quyen - GIỮ EAGER để load quyền cho authentication
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(
             name = "vai_tro_quyen",
@@ -99,23 +104,28 @@ public class VaiTro {
     }
 
     /**
-     * Phương thức thêm quyền cho vai trò
+     * ✅ SỬA: Phương thức thêm quyền cho vai trò - TRÁNH CIRCULAR REFERENCE
      *
      * @param quyen quyền cần thêm
      */
     public void themQuyen(Quyen quyen) {
+        if (this.quyenSet == null) {
+            this.quyenSet = new HashSet<>();
+        }
         this.quyenSet.add(quyen);
-        quyen.getVaiTroSet().add(this);
+        // ✅ KHÔNG gọi quyen.getVaiTroSet().add(this) để tránh circular reference
     }
 
     /**
-     * Phương thức xóa quyền khỏi vai trò
+     * ✅ SỬA: Phương thức xóa quyền khỏi vai trò - TRÁNH CIRCULAR REFERENCE
      *
      * @param quyen quyền cần xóa
      */
     public void xoaQuyen(Quyen quyen) {
-        this.quyenSet.remove(quyen);
-        quyen.getVaiTroSet().remove(this);
+        if (this.quyenSet != null) {
+            this.quyenSet.remove(quyen);
+        }
+        // ✅ KHÔNG gọi quyen.getVaiTroSet().remove(this) để tránh circular reference
     }
 
     /**
@@ -125,17 +135,23 @@ public class VaiTro {
      * @return true nếu có quyền, false nếu không
      */
     public boolean coQuyen(String tenQuyen) {
+        if (quyenSet == null) return false;
         return quyenSet.stream()
                 .anyMatch(quyen -> quyen.getTenQuyen().equals(tenQuyen));
     }
 
     /**
-     * Lấy số lượng người dùng có vai trò này
+     * ✅ SỬA: Lấy số lượng người dùng có vai trò này - TRÁNH LAZY LOADING
      *
      * @return số lượng người dùng
      */
     public int getSoLuongNguoiDung() {
-        return nguoiDungSet.size();
+        try {
+            return nguoiDungSet != null ? nguoiDungSet.size() : 0;
+        } catch (Exception e) {
+            // Tránh lazy loading exception
+            return 0;
+        }
     }
 
     /**
@@ -144,20 +160,30 @@ public class VaiTro {
      * @return số lượng quyền
      */
     public int getSoLuongQuyen() {
-        return quyenSet.size();
+        return quyenSet != null ? quyenSet.size() : 0;
     }
 
     /**
-     * Kiểm tra vai trò có đang được sử dụng hay không
+     * ✅ SỬA: Kiểm tra vai trò có đang được sử dụng hay không - TRÁNH LAZY LOADING
      *
      * @return true nếu có người dùng, false nếu không
      */
     public boolean dangDuocSuDung() {
-        return !nguoiDungSet.isEmpty();
+        try {
+            return nguoiDungSet != null && !nguoiDungSet.isEmpty();
+        } catch (Exception e) {
+            // Tránh lazy loading exception
+            return false;
+        }
     }
 
     // Các vai trò mặc định của hệ thống
     public static final String QUAN_TRI_VIEN = "QUAN_TRI_VIEN";
+    public static final String HIEU_TRUONG = "HIEU_TRUONG";
+    public static final String TRUONG_PHONG_CSVC = "TRUONG_PHONG_CSVC";
+    public static final String NHAN_VIEN_CSVC = "NHAN_VIEN_CSVC";
+    public static final String KY_THUAT_VIEN = "KY_THUAT_VIEN";
+    public static final String GIAO_VIEN = "GIAO_VIEN";
     public static final String TRUONG_DOI_BAO_TRI = "TRUONG_DOI_BAO_TRI";
     public static final String NHAN_VIEN_BAO_TRI = "NHAN_VIEN_BAO_TRI";
     public static final String NHAN_VIEN_KY_THUAT = "NHAN_VIEN_KY_THUAT";

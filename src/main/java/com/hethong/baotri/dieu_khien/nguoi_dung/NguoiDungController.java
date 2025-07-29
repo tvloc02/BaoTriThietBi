@@ -1,5 +1,5 @@
 package com.hethong.baotri.dieu_khien.nguoi_dung;
-/*
+
 import com.hethong.baotri.dich_vu.nguoi_dung.NguoiDungService;
 import com.hethong.baotri.dto.nguoi_dung.NguoiDungDTO;
 import lombok.RequiredArgsConstructor;
@@ -130,4 +130,3 @@ public class NguoiDungController {
     }
 }
 
- */

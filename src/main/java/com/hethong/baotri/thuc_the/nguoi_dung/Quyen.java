@@ -1,10 +1,12 @@
 package com.hethong.baotri.thuc_the.nguoi_dung;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
@@ -23,12 +25,14 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"vaiTroSet"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true) // ✅ CHỈ SỬ DỤNG ID
+@ToString(exclude = {"vaiTroSet"}) // ✅ LOẠI BỎ circular references
 public class Quyen {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_quyen")
+    @EqualsAndHashCode.Include // ✅ CHỈ SỬ DỤNG ID cho equals/hashCode
     private Long idQuyen;
 
     @NotBlank(message = "Tên quyền không được để trống")
@@ -54,8 +58,9 @@ public class Quyen {
     @Column(name = "trang_thai_hoat_dong", nullable = false)
     private Boolean trangThaiHoatDong = true;
 
-    // Quan hệ Many-to-Many với VaiTro
+    // ✅ Quan hệ Many-to-Many với VaiTro - TRÁNH CIRCULAR REFERENCE
     @ManyToMany(mappedBy = "quyenSet", fetch = FetchType.LAZY)
+    @JsonIgnore // ✅ QUAN TRỌNG: Tránh JSON serialization loop
     private Set<VaiTro> vaiTroSet = new HashSet<>();
 
     @PrePersist
@@ -103,21 +108,31 @@ public class Quyen {
     }
 
     /**
-     * Lấy số lượng vai trò có quyền này
+     * ✅ SỬA: Lấy số lượng vai trò có quyền này - TRÁNH LAZY LOADING
      *
      * @return số lượng vai trò
      */
     public int getSoLuongVaiTro() {
-        return vaiTroSet.size();
+        try {
+            return vaiTroSet != null ? vaiTroSet.size() : 0;
+        } catch (Exception e) {
+            // Tránh lazy loading exception
+            return 0;
+        }
     }
 
     /**
-     * Kiểm tra quyền có đang được sử dụng hay không
+     * ✅ SỬA: Kiểm tra quyền có đang được sử dụng hay không - TRÁNH LAZY LOADING
      *
      * @return true nếu có vai trò sử dụng, false nếu không
      */
     public boolean dangDuocSuDung() {
-        return !vaiTroSet.isEmpty();
+        try {
+            return vaiTroSet != null && !vaiTroSet.isEmpty();
+        } catch (Exception e) {
+            // Tránh lazy loading exception
+            return false;
+        }
     }
 
     // Các quyền mặc định của hệ thống

@@ -1,10 +1,1516 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Dashboard Admin - BaoTriStack</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+
+    <style>
+        :root {
+            --primary-blue: #2563eb;
+            --success-green: #059669;
+            --warning-orange: #d97706;
+            --danger-red: #dc2626;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            background: white;
+            border-radius: 20px;
+            margin: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--gradient-primary);
+            padding: 30px 40px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 200px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="rgba(255,255,255,0.1)"/></svg>');
+            transform: translate(50px, -50px);
+        }
+
+        .welcome-section {
+            position: relative;
+            z-index: 2;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .status-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 3;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .account-dropdown {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 15px;
+            width: 250px;
+            color: var(--gray-800);
+        }
+
+        .account-dropdown-item {
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .account-dropdown-item:hover {
+            background: var(--gray-100);
+        }
+
+        .navbar-custom {
+            background: var(--gray-50);
+            padding: 10px 40px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .navbar-custom .nav-link {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: var(--primary-blue);
+            background: var(--gray-100);
+            border-radius: 6px;
+        }
+
+        .navbar-custom .dropdown-menu {
+            border-radius: 8px;
+            border: 1px solid var(--gray-100);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+        }
+
+        .navbar-custom .dropdown-item {
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 4px;
+        }
+
+        .navbar-custom .dropdown-item:hover {
+            background: var(--gray-100);
+            color: var(--primary-blue);
+        }
+
+        .stats-container {
+            padding: 40px;
+            background: var(--gray-50);
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .stat-card.primary::before { background: var(--primary-blue); }
+        .stat-card.success::before { background: var(--success-green); }
+        .stat-card.warning::before { background: var(--warning-orange); }
+        .stat-card.danger::before { background: var(--danger-red); }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .stat-icon.primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-icon.success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .stat-icon.warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-icon.info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--gray-600);
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .trend-up { color: var(--success-green); }
+        .trend-down { color: var(--danger-red); }
+
+        .action-buttons {
+            padding: 0 40px 40px;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn {
+            border: 2px solid var(--gray-100);
+            border-radius: 12px;
+            padding: 20px;
+            text-decoration: none;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .action-btn:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+
+        .action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover .action-icon {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .chart-section {
+            padding: 0 40px 40px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 20px;
+        }
+
+        .activity-item {
+            padding: 15px 0;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 500;
+            color: var(--gray-800);
+            margin-bottom: 4px;
+        }
+
+        .activity-time {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-online { background: var(--success-green); }
+        .status-warning { background: var(--warning-orange); }
+        .status-offline { background: var(--danger-red); }
+
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .welcome-title {
+                font-size: 2rem;
+            }
+
+            .user-info {
+                position: static;
+                margin-top: 20px;
+            }
+
+            .stats-container,
+            .action-buttons,
+            .chart-section {
+                padding: 20px;
+            }
+
+            .navbar-custom .nav-link {
+                font-size: 0.85rem;
+                padding: 6px 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-$END$
+<div class="main-container">
+    <!-- Header Section -->
+    <div class="header">
+        <div class="user-info">
+            <div class="user-avatar" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="dropdown">
+                <div class="account-dropdown dropdown-menu dropdown-menu-end">
+                    <div class="account-dropdown-item">
+                        <i class="fas fa-user me-2"></i>
+                        <span th:text="${hoVaTen ?: 'Admin User'}">Admin User</span>
+                    </div>
+                    <div class="account-dropdown-item">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        <span th:text="${roleTitle ?: 'Quản trị viên'}">Quản trị viên</span>
+                    </div>
+                    <div class="account-dropdown-item">
+                        <i class="fas fa-envelope me-2"></i>
+                        <span th:text="${email ?: 'admin@baotristack.vn'}">admin@baotristack.vn</span>
+                    </div>
+                    <div class="account-dropdown-item">
+                        <i class="fas fa-clock me-2"></i>
+                        <span>Đăng nhập gần nhất: <span th:text="${lastLogin ?: '28/07/2025 14:00'}">28/07/2025 14:00</span></span>
+                    </div>
+                    <hr class="my-2">
+                    <a href="/tai-khoan/chinh-sua" class="account-dropdown-item">
+                        <i class="fas fa-user-edit me-2"></i> Chỉnh sửa hồ sơ
+                    </a>
+                    <a href="/logout" class="account-dropdown-item text-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
+                    </a>
+                </div>
+            </div>
+            <div>
+                <div style="font-weight: 600; margin-bottom: 4px;" th:text="${hoVaTen ?: 'Admin User'}">Admin User</div>
+                <div style="opacity: 0.8; font-size: 0.9rem;" th:text="${roleTitle ?: 'Quản trị viên'}">Quản trị viên</div>
+                <div style="opacity: 0.7; font-size: 0.8rem;">
+                    <i class="fas fa-clock me-1"></i>
+                    <span th:text="${currentTime}">28/07/2025 14:30</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="welcome-section">
+            <div class="welcome-title">
+                <i class="fas fa-wrench me-3"></i>Chào mừng trở lại!
+            </div>
+            <div class="welcome-subtitle">
+                Hệ thống quản lý thiết bị BaoTriStack đang hoạt động tốt. Hôm nay có
+                <span class="fw-bold" th:text="${yeuCauChoDuyet ?: 0}">0</span> yêu cầu bảo trì cần xử lý và
+                <span class="fw-bold" th:text="${tongCanhBao ?: 0}">0</span> cảnh báo cần kiểm tra.
+            </div>
+            <div class="status-badge">
+                <span class="status-indicator status-online"></span>
+                <span id="systemStatusText">Hệ thống hoạt động bình thường</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Horizontal Navigation Menu -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item dropdown" th:if="${canManageUsers}">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Người dùng
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/nguoi-dung/danh-sach">Danh sách người dùng</a></li>
+                            <li><a class="dropdown-item" href="/nguoi-dung/duyet-yeu-cau">Duyệt yêu cầu</a></li>
+                            <li><a class="dropdown-item" href="/nguoi-dung/them-moi">Thêm người dùng</a></li>
+                            <li><a class="dropdown-item" href="/nguoi-dung/kiem-tra-dinh-ky">Kiểm tra định kỳ</a></li>
+                            <li><a class="dropdown-item" href="/nguoi-dung/lich-su-bao-tri">Lịch sử bảo trì</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item" th:if="${canManageDevices}">
+                        <a class="nav-link" href="/thiet-bi">Thiết bị</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Vật tư
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/vat-tu/quan-ly-kho">Quản lý kho</a></li>
+                            <li><a class="dropdown-item" href="/vat-tu/thieu-hang">Vật tư thiếu hàng</a></li>
+                            <li><a class="dropdown-item" href="/vat-tu/het-han">Vật tư hết hạn</a></li>
+                            <li><a class="dropdown-item" href="/vat-tu/bao-cao-ton-kho">Báo cáo tồn kho</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown" th:if="${canManageMaintenance}">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Bảo trì
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/bao-tri/yeu-cau">Yêu cầu bảo trì</a></li>
+                            <li><a class="dropdown-item" href="/bao-tri/duyet-yeu-cau">Duyệt yêu cầu</a></li>
+                            <li><a class="dropdown-item" href="/bao-tri/ke-hoach">Kế hoạch bảo trì</a></li>
+                            <li><a class="dropdown-item" href="/bao-tri/thuc-hien">Thực hiện bảo trì</a></li>
+                            <li><a class="dropdown-item" href="/bao-tri/kiem-tra-dinh-ky">Kiểm tra định kỳ</a></li>
+                            <li><a class="dropdown-item" href="/bao-tri/lich-su">Lịch sử bảo trì</a></li>
+                            <li><a class="dropdown-item" href="/bao-tri/canh-bao-loi">Cảnh báo lỗi</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown" th:if="${canManageTeams}">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Đội bảo trì
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/doi-bao-tri/danh-sach">Danh sách đội</a></li>
+                            <li><a class="dropdown-item" href="/doi-bao-tri/them-moi">Thêm đội mới</a></li>
+                            <li><a class="dropdown-item" href="/doi-bao-tri/quan-ly-thanh-vien">Quản lý thành viên</a></li>
+                            <li><a class="dropdown-item" href="/doi-bao-tri/phan-cong">Phân công công việc</a></li>
+                            <li><a class="dropdown-item" href="/doi-bao-tri/hieu-suat">Hiệu suất đội</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown" th:if="${canViewReports}">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Báo cáo
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/bao-cao/tong-hop">Báo cáo tổng hợp</a></li>
+                            <li><a class="dropdown-item" href="/bao-cao/oee">Báo cáo OEE</a></li>
+                            <li><a class="dropdown-item" href="/bao-cao/mtbf">Báo cáo MTBF</a></li>
+                            <li><a class="dropdown-item" href="/bao-cao/thong-ke-bao-tri">Thống kê bảo trì</a></li>
+                            <li><a class="dropdown-item" href="/bao-cao/thiet-bi">Báo cáo thiết bị</a></li>
+                            <li><a class="dropdown-item" href="/bao-cao/vat-tu">Báo cáo vật tư</a></li>
+                            <li><a class="dropdown-item" href="/bao-cao/thong-ke-hieu-suat">Thống kê hiệu suất</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown" th:if="${canManageSystem}">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Debug
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/debug/csrf-token">CSRF Token</a></li>
+                            <li><a class="dropdown-item" href="/debug/test-form">Test Form</a></li>
+                            <li><a class="dropdown-item" href="/debug/test-dashboard">Test Dashboard</a></li>
+                            <li><a class="dropdown-item" href="/debug/check-auth">Check Auth</a></li>
+                            <li><a class="dropdown-item" href="/debug/force-login">Force Login</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Trợ giúp
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/tro-giup/huong-dan-su-dung">Hướng dẫn sử dụng</a></li>
+                            <li><a class="dropdown-item" href="/tro-giup/video-huong-dan">Video hướng dẫn</a></li>
+                            <li><a class="dropdown-item" href="/tro-giup/cau-hoi-thuong-gap">Câu hỏi thường gặp</a></li>
+                            <li><a class="dropdown-item" href="/tro-giup/lien-he-ho-tro">Liên hệ hỗ trợ</a></li>
+                            <li><a class="dropdown-item" href="/tro-giup/ve-he-thong">Về hệ thống</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Statistics Cards -->
+    <div class="stats-container">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card primary">
+                    <div class="stat-icon primary">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="stat-number" id="tongThietBi" th:text="${tongThietBi ?: 0}">0</div>
+                    <div class="stat-label">Tổng số thiết bị</div>
+                    <div class="stat-trend trend-up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>5 thiết bị mới</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card warning">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div class="stat-number" id="tongYeuCauBaoTri" th:text="${tongYeuCauBaoTri ?: 0}">0</div>
+                    <div class="stat-label">Yêu cầu bảo trì</div>
+                    <div class="stat-trend trend-up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span th:text="${yeuCauChoDuyet ?: 0} + ' chờ duyệt'">0 chờ duyệt</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card success">
+                    <div class="stat-icon success">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="stat-number" id="tongVatTu" th:text="${tongVatTu ?: 0}">0</div>
+                    <div class="stat-label">Vật tư trong kho</div>
+                    <div class="stat-trend trend-down">
+                        <i class="fas fa-arrow-down"></i>
+                        <span th:text="${vatTuThieuHang ?: 0} + ' loại thiếu hàng'">0 loại thiếu hàng</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card danger">
+                    <div class="stat-icon info">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-number" id="tongCanhBao" th:text="${tongCanhBao ?: 0}">0</div>
+                    <div class="stat-label">Cảnh báo</div>
+                    <div class="stat-trend trend-up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>3 cảnh báo mới</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Admin Stats -->
+        <div class="row g-4 mt-2">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card primary">
+                    <div class="stat-icon primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number" id="tongNguoiDung" th:text="${tongNguoiDung ?: 0}">0</div>
+                    <div class="stat-label">Người dùng</div>
+                    <div class="stat-trend trend-up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span th:text="${nguoiDungHoatDong ?: 0} + ' đang hoạt động'">0 đang hoạt động</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card success">
+                    <div class="stat-icon success">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                    <div class="stat-number" id="tongDoiBaoTri" th:text="${tongDoiBaoTri ?: 0}">0</div>
+                    <div class="stat-label">Đội bảo trì</div>
+                    <div class="stat-trend trend-up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span th:text="${doiBaoTriHoatDong ?: 0} + ' đang hoạt động'">0 đang hoạt động</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card warning">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-number" id="efficiencyRate">85%</div>
+                    <div class="stat-label">Hiệu suất bảo trì</div>
+                    <div class="stat-trend trend-up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+5% so với tháng trước</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card info">
+                    <div class="stat-icon info">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-number" id="avgResponseTime">2.5h</div>
+                    <div class="stat-label">Thời gian phản hồi TB</div>
+                    <div class="stat-trend trend-down">
+                        <i class="fas fa-arrow-down"></i>
+                        <span>-0.5h so với tuần trước</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="action-buttons">
+        <div class="action-card">
+            <h5 class="mb-4">
+                <i class="fas fa-bolt text-warning me-2"></i>
+                Thao tác nhanh
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-3 col-sm-6" th:if="${canManageUsers}">
+                    <a href="/nguoi-dung/them-moi" class="action-btn" title="Ctrl+3">
+                        <div class="action-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">Thêm người dùng</div>
+                            <small class="text-muted">Quản lý tài khoản</small>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-3 col-sm-6" th:if="${canManageDevices}">
+                    <a href="/thiet-bi/them-moi" class="action-btn" title="Ctrl+2">
+                        <div class="action-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">Thêm thiết bị</div>
+                            <small class="text-muted">Quản lý thiết bị</small>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <a href="/bao-tri/tao-yeu-cau" class="action-btn" title="Ctrl+1">
+                        <div class="action-icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">Tạo yêu cầu</div>
+                            <small class="text-muted">Bảo trì thiết bị</small>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-3 col-sm-6" th:if="${canViewReports}">
+                    <a href="/bao-cao/xuat" class="action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">Xuất báo cáo</div>
+                            <small class="text-muted">Thống kê dữ liệu</small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Advanced Admin Actions -->
+            <div class="row g-3 mt-3" th:if="${canManageSystem}">
+                <div class="col-md-3 col-sm-6">
+                    <a href="/doi-bao-tri/quan-ly" class="action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-users-cog"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">Quản lý đội</div>
+                            <small class="text-muted">Phân công nhân viên</small>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <a href="/he-thong/cau-hinh" class="action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">Cấu hình hệ thống</div>
+                            <small class="text-muted">Tùy chỉnh hệ thống</small>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <a href="/he-thong/backup" class="action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">Sao lưu dữ liệu</div>
+                            <small class="text-muted">Backup & Restore</small>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <a href="/he-thong/log" class="action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">Xem log hệ thống</div>
+                            <small class="text-muted">Theo dõi hoạt động</small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Analytics -->
+    <div class="chart-section">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="chart-title mb-0">Hoạt động gần đây</h6>
+                        <button class="btn btn-sm btn-outline-primary" onclick="refreshActivities()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div id="recentActivities">
+                        <div class="text-center py-4">
+                            <div class="loading"></div>
+                            <p class="mt-2 text-muted">Đang tải hoạt động...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="chart-title mb-0">Trạng thái hệ thống</h6>
+                        <span class="badge bg-success" id="systemOverallStatus">Hoạt động tốt</span>
+                    </div>
+                    <div id="systemStatus">
+                        <div class="text-center py-4">
+                            <div class="loading"></div>
+                            <p class="mt-2 text-muted">Đang kiểm tra hệ thống...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Toolbar -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1000;">
+        <div class="card shadow-sm">
+            <div class="card-body p-2">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-primary" onclick="refreshDashboard()" title="Refresh (Ctrl+R)">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="btn btn-sm btn-success" onclick="exportData()" title="Export Data">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="btn btn-sm btn-info" onclick="toggleFullscreen()" title="Fullscreen">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <a href="/logout" class="btn btn-sm btn-danger" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Container -->
+<div id="notificationContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Configuration
+    const API_BASE = '/api';
+    const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+    // Initialize Dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeDashboard();
+        setupEventListeners();
+        setupKeyboardShortcuts();
+        startAutoRefresh();
+    });
+
+    async function initializeDashboard() {
+        try {
+            showNotification('Đang tải dashboard...', 'info');
+
+            await Promise.all([
+                loadDashboardData(),
+                loadRecentActivities(),
+                loadSystemStatus()
+            ]);
+
+            showNotification('Dashboard đã được tải thành công!', 'success');
+        } catch (error) {
+            console.error('Error initializing dashboard:', error);
+            showNotification('Có lỗi khi tải dashboard', 'error');
+        }
+    }
+
+    async function loadDashboardData() {
+        try {
+            // Load equipment statistics
+            const deviceStats = await fetchAPI('/thong-ke/thiet-bi');
+            if (deviceStats) {
+                updateStatCard('tongThietBi', deviceStats.tongThietBi || 0);
+            }
+
+            // Load maintenance statistics
+            const maintenanceStats = await fetchAPI('/thong-ke/bao-tri');
+            if (maintenanceStats) {
+                updateStatCard('tongYeuCauBaoTri', maintenanceStats.tongYeuCau || 0);
+            }
+
+            // Update system status in header
+            updateSystemStatusBadge();
+
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+        }
+    }
+
+    async function loadRecentActivities() {
+        try {
+            const activities = await fetchAPI('/hoat-dong-gan-day');
+            const container = document.getElementById('recentActivities');
+
+            if (activities && activities.length > 0) {
+                container.innerHTML = activities.slice(0, 6).map(activity => `
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: ${getActivityColor(activity.type)}">
+                                <i class="fas ${getActivityIcon(activity.type)}"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">${activity.title}</div>
+                                <div class="activity-time">${formatTime(activity.timestamp)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+            } else {
+                // Fallback data
+                container.innerHTML = `
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: var(--success-green)">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Hoàn thành bảo trì thiết bị #TB001</div>
+                                <div class="activity-time">5 phút trước</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: var(--warning-orange)">
+                                <i class="fas fa-exclamation"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Cảnh báo thiết bị cần kiểm tra</div>
+                                <div class="activity-time">15 phút trước</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: var(--primary-blue)">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Thêm người dùng mới</div>
+                                <div class="activity-time">30 phút trước</div>
+                            </div>
+                        </div>
+                    `;
+            }
+        } catch (error) {
+            console.error('Error loading activities:', error);
+            document.getElementById('recentActivities').innerHTML = '<p class="text-muted text-center">Không thể tải hoạt động gần đây</p>';
+        }
+    }
+
+    async function loadSystemStatus() {
+        try {
+            const status = await fetchAPI('/he-thong/trang-thai');
+            const container = document.getElementById('systemStatus');
+
+            if (status && Object.keys(status).length > 0) {
+                container.innerHTML = Object.entries(status).map(([key, value]) => `
+                        <div class="status-item">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator ${getStatusClass(value.status)}"></span>
+                                <span>${value.name}</span>
+                            </div>
+                            <span class="badge bg-${getStatusBadgeClass(value.status)}">${getStatusText(value.status)}</span>
+                        </div>
+                    `).join('');
+            } else {
+                // Fallback data
+                container.innerHTML = `
+                        <div class="status-item">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator status-online"></span>
+                                <span>Database Server</span>
+                            </div>
+                            <span class="badge bg-success">Online</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator status-online"></span>
+                                <span>Application Server</span>
+                            </div>
+                            <span class="badge bg-success">Online</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator status-warning"></span>
+                                <span>Backup Service</span>
+                            </div>
+                            <span class="badge bg-warning">Warning</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator status-online"></span>
+                                <span>Email Service</span>
+                            </div>
+                            <span class="badge bg-success">Online</span>
+                        </div>
+                    `;
+            }
+
+            updateOverallSystemStatus(status);
+        } catch (error) {
+            console.error('Error loading system status:', error);
+            document.getElementById('systemStatus').innerHTML = '<p class="text-muted text-center">Không thể tải trạng thái hệ thống</p>';
+        }
+    }
+
+    // Event Listeners
+    function setupEventListeners() {
+        // Action button hover effects
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    }
+
+    function setupKeyboardShortcuts() {
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        window.location.href = '/bao-tri/tao-yeu-cau';
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        window.location.href = '/thiet-bi/them-moi';
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        window.location.href = '/nguoi-dung/them-moi';
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        refreshDashboard();
+                        break;
+                    case 'k':
+                        e.preventDefault();
+                        toggleSearch();
+                        break;
+                }
+            }
+            if (e.key === 'Escape') {
+                closeAllModals();
+            }
+        });
+    }
+
+    function startAutoRefresh() {
+        setInterval(() => {
+            loadDashboardData();
+            checkForNewAlerts();
+        }, REFRESH_INTERVAL);
+    }
+
+    // Utility Functions
+    async function fetchAPI(endpoint) {
+        try {
+            const response = await fetch(API_BASE + endpoint, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error(`Error fetching ${endpoint}:`, error);
+            return null;
+        }
+    }
+
+    function updateStatCard(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            if (typeof value === 'number') {
+                element.textContent = value.toLocaleString('vi-VN');
+            } else {
+                element.textContent = value;
+            }
+        }
+    }
+
+    function getActivityColor(type) {
+        const colors = {
+            'success': 'var(--success-green)',
+            'warning': 'var(--warning-orange)',
+            'info': 'var(--primary-blue)',
+            'error': 'var(--danger-red)',
+            'maintenance': 'var(--warning-orange)',
+            'completion': 'var(--success-green)',
+            'user': 'var(--primary-blue)',
+            'alert': 'var(--danger-red)'
+        };
+        return colors[type] || 'var(--gray-600)';
+    }
+
+    function getActivityIcon(type) {
+        const icons = {
+            'success': 'fa-check',
+            'warning': 'fa-exclamation',
+            'info': 'fa-info',
+            'error': 'fa-times',
+            'maintenance': 'fa-tools',
+            'completion': 'fa-check-circle',
+            'user': 'fa-user',
+            'alert': 'fa-exclamation-triangle'
+        };
+        return icons[type] || 'fa-info';
+    }
+
+    function getStatusClass(status) {
+        const classes = {
+            'online': 'status-online',
+            'warning': 'status-warning',
+            'offline': 'status-offline',
+            'active': 'status-online',
+            'inactive': 'status-offline'
+        };
+        return classes[status.toLowerCase()] || 'status-offline';
+    }
+
+    function getStatusBadgeClass(status) {
+        const classes = {
+            'online': 'success',
+            'warning': 'warning',
+            'offline': 'danger',
+            'active': 'success',
+            'inactive': 'secondary'
+        };
+        return classes[status.toLowerCase()] || 'secondary';
+    }
+
+    function getStatusText(status) {
+        const texts = {
+            'online': 'Online',
+            'warning': 'Cảnh báo',
+            'offline': 'Offline',
+            'active': 'Hoạt động',
+            'inactive': 'Không hoạt động'
+        };
+        return texts[status.toLowerCase()] || status;
+    }
+
+    function formatTime(timestamp) {
+        if (!timestamp) return 'Vừa xong';
+
+        const now = new Date();
+        const time = new Date(timestamp);
+        const diff = Math.floor((now - time) / 1000);
+
+        if (diff < 60) return `${diff} giây trước`;
+        if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
+        return `${Math.floor(diff / 86400)} ngày trước`;
+    }
+
+    function showNotification(message, type = 'info', duration = 5000) {
+        const container = document.getElementById('notificationContainer');
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+        notification.style.cssText = 'min-width: 300px; margin-bottom: 10px;';
+        notification.innerHTML = `
+               <div class="d-flex align-items-center">
+                   <i class="fas ${getNotificationIcon(type)} me-2"></i>
+                   <span>${message}</span>
+               </div>
+               <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+           `;
+
+        container.appendChild(notification);
+
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, duration);
+    }
+
+    function getNotificationIcon(type) {
+        const icons = {
+            'success': 'fa-check-circle',
+            'error': 'fa-exclamation-circle',
+            'warning': 'fa-exclamation-triangle',
+            'info': 'fa-info-circle'
+        };
+        return icons[type] || 'fa-info-circle';
+    }
+
+    function updateSystemStatusBadge() {
+        const badge = document.querySelector('.status-badge');
+        const statusText = document.getElementById('systemStatusText');
+
+        // This would be updated based on actual system health
+        const isHealthy = true; // Replace with actual health check
+
+        if (isHealthy) {
+            badge.querySelector('.status-indicator').className = 'status-indicator status-online';
+            statusText.textContent = 'Hệ thống hoạt động bình thường';
+        } else {
+            badge.querySelector('.status-indicator').className = 'status-indicator status-warning';
+            statusText.textContent = 'Hệ thống có cảnh báo';
+        }
+    }
+
+    function updateOverallSystemStatus(statusData) {
+        const badge = document.getElementById('systemOverallStatus');
+        if (!statusData || Object.keys(statusData).length === 0) return;
+
+        const statuses = Object.values(statusData).map(item => item.status);
+        const hasOffline = statuses.includes('offline');
+        const hasWarning = statuses.includes('warning');
+
+        if (hasOffline) {
+            badge.className = 'badge bg-danger';
+            badge.textContent = 'Có sự cố';
+        } else if (hasWarning) {
+            badge.className = 'badge bg-warning';
+            badge.textContent = 'Có cảnh báo';
+        } else {
+            badge.className = 'badge bg-success';
+            badge.textContent = 'Hoạt động tốt';
+        }
+    }
+
+    // Dashboard Actions
+    async function refreshDashboard() {
+        showNotification('Đang làm mới dashboard...', 'info');
+
+        try {
+            await Promise.all([
+                loadDashboardData(),
+                loadRecentActivities(),
+                loadSystemStatus()
+            ]);
+
+            showNotification('Dashboard đã được làm mới!', 'success');
+        } catch (error) {
+            console.error('Error refreshing dashboard:', error);
+            showNotification('Có lỗi khi làm mới dashboard', 'error');
+        }
+    }
+
+    async function refreshActivities() {
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i>';
+        button.disabled = true;
+
+        try {
+            await loadRecentActivities();
+            showNotification('Hoạt động đã được cập nhật', 'success');
+        } catch (error) {
+            showNotification('Không thể cập nhật hoạt động', 'error');
+        } finally {
+            button.innerHTML = originalHTML;
+            button.disabled = false;
+        }
+    }
+
+    async function exportData() {
+        try {
+            showNotification('Đang xuất dữ liệu...', 'info');
+
+            const data = await fetchAPI('/dashboard/xuat');
+            if (data) {
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `dashboard-export-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showNotification('Dữ liệu đã được xuất thành công', 'success');
+            } else {
+                throw new Error('No data received');
+            }
+        } catch (error) {
+            console.error('Error exporting data:', error);
+            showNotification('Có lỗi khi xuất dữ liệu', 'error');
+        }
+    }
+
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error('Error attempting to enable fullscreen:', err);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    function toggleSearch() {
+        const searchModal = new bootstrap.Modal(document.getElementById('searchModal') || createSearchModal());
+        searchModal.show();
+    }
+
+    function createSearchModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'searchModal';
+        modal.innerHTML = `
+               <div class="modal-dialog">
+                   <div class="modal-content">
+                       <div class="modal-header">
+                           <h5 class="modal-title">Tìm kiếm nhanh</h5>
+                           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                       </div>
+                       <div class="modal-body">
+                           <input type="text" class="form-control" placeholder="Nhập từ khóa tìm kiếm..." id="searchInput">
+                           <div id="searchResults" class="mt-3"></div>
+                       </div>
+                   </div>
+               </div>
+           `;
+        document.body.appendChild(modal);
+        return modal;
+    }
+
+    function closeAllModals() {
+        document.querySelectorAll('.modal.show').forEach(modal => {
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        });
+    }
+
+    async function checkForNewAlerts() {
+        try {
+            const newAlerts = await fetchAPI('/canh-bao-loi/moi');
+            if (newAlerts && newAlerts.length > 0) {
+                newAlerts.forEach(alert => {
+                    showNotification(`Cảnh báo mới: ${alert.tieuDe}`, 'warning', 10000);
+                });
+
+                // Update alert count
+                const alertCount = document.querySelector('[data-stat="tongCanhBao"] .stat-number');
+                if (alertCount) {
+                    const currentCount = parseInt(alertCount.textContent) || 0;
+                    alertCount.textContent = currentCount + newAlerts.length;
+                }
+            }
+        } catch (error) {
+            console.error('Error checking for new alerts:', error);
+        }
+    }
+
+    // Performance monitoring
+    function monitorPerformance() {
+        if ('performance' in window) {
+            window.addEventListener('load', function() {
+                const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+                console.log(`Dashboard loaded in ${loadTime}ms`);
+
+                if (loadTime > 3000) {
+                    showNotification('Dashboard đang tải chậm. Vui lòng kiểm tra kết nối mạng.', 'warning');
+                }
+            });
+        }
+    }
+
+    monitorPerformance();
+
+    // Service Worker registration
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').then(function(registration) {
+            console.log('ServiceWorker registration successful');
+        }).catch(function(err) {
+            console.log('ServiceWorker registration failed: ', err);
+        });
+    }
+
+    // Print functionality
+    function printDashboard() {
+        window.print();
+    }
+
+    // Add print shortcut
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            printDashboard();
+        }
+    });
+
+    // Dark mode toggle (optional)
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+
+    // Load dark mode preference
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+    }
+
+    // Error boundary
+    window.addEventListener('error', function(e) {
+        console.error('Dashboard error:', e.error);
+        showNotification('Đã xảy ra lỗi không mong muốn. Trang sẽ được làm mới.', 'error');
+        setTimeout(() => {
+            location.reload();
+        }, 3000);
+    });
+
+    // Unhandled promise rejection
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('Unhandled promise rejection:', e.reason);
+        showNotification('Có lỗi xảy ra khi tải dữ liệu.', 'error');
+    });
+</script>
+
+<style media="print">
+    .action-buttons,
+    .user-info,
+    .position-fixed,
+    .navbar-custom {
+        display: none !important;
+    }
+
+    .main-container {
+        box-shadow: none !important;
+        margin: 0 !important;
+    }
+
+    .chart-card,
+    .stat-card {
+        break-inside: avoid;
+    }
+
+    .header {
+        background: #667eea !important;
+        -webkit-print-color-adjust: exact;
+    }
+</style>
+
+<!-- Dark mode styles (optional) -->
+<style>
+    .dark-mode {
+        --gray-50: #1f2937;
+        --gray-100: #374151;
+        --gray-600: #d1d5db;
+        --gray-800: #f9fafb;
+    }
+
+    .dark-mode .main-container {
+        background: #1f2937;
+        color: #f9fafb;
+    }
+
+    .dark-mode .stat-card,
+    .dark-mode .action-card,
+    .dark-mode .chart-card {
+        background: #374151;
+        color: #f9fafb;
+    }
+
+    .dark-mode .stats-container,
+    .dark-mode .navbar-custom {
+        background: #111827;
+    }
+</style>
 </body>
 </html>

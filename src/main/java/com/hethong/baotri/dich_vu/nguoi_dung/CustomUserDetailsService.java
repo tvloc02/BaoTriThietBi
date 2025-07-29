@@ -1,3 +1,5 @@
+// ✅ CẬP NHẬT FILE: com/hethong/baotri/dich_vu/nguoi_dung/CustomUserDetailsService.java
+
 package com.hethong.baotri.dich_vu.nguoi_dung;
 
 import com.hethong.baotri.kho_du_lieu.nguoi_dung.NguoiDungRepository;
@@ -14,9 +16,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -26,101 +29,85 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final NguoiDungRepository nguoiDungRepository;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.info("🔍 === LOADING USER DETAILS ===");
-        log.info("👤 Username: {}", username);
+        log.info("🔍 Loading user details for username: [{}]", username);
 
-        Optional<NguoiDung> userOpt = nguoiDungRepository.findByTenDangNhap(username);
+        // ✅ Tìm user trong database
+        NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhap(username)
+                .orElseThrow(() -> {
+                    log.error("❌ User not found: [{}]", username);
+                    return new UsernameNotFoundException("Không tìm thấy người dùng: " + username);
+                });
 
-        if (userOpt.isEmpty()) {
-            log.error("❌ User not found: {}", username);
-            throw new UsernameNotFoundException("User not found: " + username);
+        log.info("👤 Found user: [{}] - Active: [{}]", nguoiDung.getTenDangNhap(), nguoiDung.getTrangThaiHoatDong());
+
+        // ✅ Load authorities từ vai trò
+        Collection<? extends GrantedAuthority> authorities = getAuthorities(nguoiDung);
+
+        log.info("🎭 Loaded authorities for [{}]: {}", username, authorities);
+
+        // ✅ Cập nhật lần đăng nhập cuối - DIRECTLY trong repository
+        try {
+            nguoiDung.capNhatLanDangNhapCuoi();
+            nguoiDungRepository.save(nguoiDung);
+            log.debug("✅ Updated last login time for user: [{}]", username);
+        } catch (Exception e) {
+            log.warn("⚠️ Could not update last login time: {}", e.getMessage());
         }
 
-        NguoiDung user = userOpt.get();
-
-        // ✅ DEBUG: Kiểm tra user info
-        log.info("✅ User found: {}", user.getTenDangNhap());
-        log.info("📧 Email: {}", user.getEmail());
-        log.info("👤 Full name: {}", user.getHoVaTen());
-        log.info("🔐 Password hash: {}", user.getMatKhau().substring(0, 20) + "...");
-
-        // ✅ DEBUG: Kiểm tra account status
-        log.info("🟢 Account enabled: {}", user.getTrangThaiHoatDong());
-        log.info("🔓 Account not locked: {}", user.getTaiKhoanKhongBiKhoa());
-        log.info("📅 Account not expired: {}", user.getTaiKhoanKhongHetHan());
-        log.info("✅ Credentials not expired: {}", user.getThongTinDangNhapHopLe());
-
-        // ✅ DEBUG: Kiểm tra roles từ database
-        log.info("🎭 Raw roles from DB: {}", user.getVaiTroSet());
-        log.info("📊 Total roles count: {}", user.getVaiTroSet().size());
-
-        // ✅ DEBUG: Log từng role một cách chi tiết
-        for (VaiTro vaiTro : user.getVaiTroSet()) {
-            log.info("📋 Role Detail - ID: {}, Name: [{}], Active: {}",
-                    vaiTro.getIdVaiTro(),
-                    vaiTro.getTenVaiTro(),
-                    vaiTro.getTrangThaiHoatDong());
-        }
-
-        // ✅ Convert roles to authorities
-        Collection<GrantedAuthority> authorities = user.getVaiTroSet().stream()
-                .filter(vaiTro -> vaiTro.getTrangThaiHoatDong()) // Chỉ lấy role active
-                .map(vaiTro -> {
-                    String roleName = vaiTro.getTenVaiTro();
-                    log.info("🔄 Converting role: [{}] -> GrantedAuthority", roleName);
-                    return new SimpleGrantedAuthority(roleName);
-                })
-                .collect(Collectors.toList());
-
-        // ✅ DEBUG: Final authorities
-        log.info("✅ Final authorities count: {}", authorities.size());
-        log.info("✅ Final authorities list: {}", authorities);
-
-        // ✅ Tạo UserDetails object
-        UserDetails userDetails = User.builder()
-                .username(user.getTenDangNhap())
-                .password(user.getMatKhau())
+        // ✅ Tạo UserDetails
+        return User.builder()
+                .username(nguoiDung.getTenDangNhap())
+                .password(nguoiDung.getMatKhau())
                 .authorities(authorities)
-                .accountExpired(!user.getTaiKhoanKhongHetHan())
-                .accountLocked(!user.getTaiKhoanKhongBiKhoa())
-                .credentialsExpired(!user.getThongTinDangNhapHopLe())
-                .disabled(!user.getTrangThaiHoatDong())
+                .accountExpired(!nguoiDung.getTaiKhoanKhongHetHan())
+                .accountLocked(!nguoiDung.getTaiKhoanKhongBiKhoa())
+                .credentialsExpired(!nguoiDung.getThongTinDangNhapHopLe())
+                .disabled(!nguoiDung.getTrangThaiHoatDong())
                 .build();
-
-        log.info("🎯 UserDetails created successfully for: {}", username);
-        log.info("🎭 UserDetails authorities: {}", userDetails.getAuthorities());
-
-        return userDetails;
     }
 
     /**
-     * ✅ Helper method để kiểm tra user có role cụ thể không
+     * ✅ Load authorities từ vai trò của user
      */
-    public boolean hasRole(String username, String roleName) {
-        try {
-            UserDetails userDetails = loadUserByUsername(username);
-            return userDetails.getAuthorities().stream()
-                    .anyMatch(auth -> auth.getAuthority().equals(roleName));
-        } catch (Exception e) {
-            log.error("❌ Error checking role for user {}: {}", username, e.getMessage());
-            return false;
-        }
-    }
+    private Collection<? extends GrantedAuthority> getAuthorities(NguoiDung nguoiDung) {
+        Set<GrantedAuthority> authorities = new HashSet<>();
 
-    /**
-     * ✅ Helper method để lấy tất cả roles của user
-     */
-    public Collection<String> getUserRoles(String username) {
-        try {
-            UserDetails userDetails = loadUserByUsername(username);
-            return userDetails.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            log.error("❌ Error getting roles for user {}: {}", username, e.getMessage());
-            return java.util.Collections.emptyList();
+        // ✅ Thêm vai trò như authorities
+        for (VaiTro vaiTro : nguoiDung.getVaiTroSet()) {
+            String roleName = vaiTro.getTenVaiTro();
+            log.debug("➕ Adding role authority: [{}]", roleName);
+            authorities.add(new SimpleGrantedAuthority(roleName));
+
+            // ✅ Thêm quyền từ vai trò (nếu có relationship với bảng Quyen)
+            if (vaiTro.getQuyenSet() != null) {
+                vaiTro.getQuyenSet().forEach(quyen -> {
+                    String quyenName = quyen.getTenQuyen();
+                    log.debug("➕ Adding permission authority: [{}]", quyenName);
+                    authorities.add(new SimpleGrantedAuthority(quyenName));
+                });
+            }
         }
+
+        // ✅ FALLBACK: Nếu user không có role nào, cho default permissions
+        if (authorities.isEmpty()) {
+            log.warn("⚠️ User [{}] has no roles, adding default permissions", nguoiDung.getTenDangNhap());
+
+            // Kiểm tra nếu là admin username thì cho quyền admin
+            if ("admin".equals(nguoiDung.getTenDangNhap())) {
+                log.info("🔑 Adding ADMIN authorities for user [admin]");
+                authorities.add(new SimpleGrantedAuthority("QUAN_TRI_VIEN"));
+                authorities.add(new SimpleGrantedAuthority("QUAN_LY_NGUOI_DUNG_XEM"));
+                authorities.add(new SimpleGrantedAuthority("QUAN_LY_NGUOI_DUNG_THEM"));
+                authorities.add(new SimpleGrantedAuthority("QUAN_LY_NGUOI_DUNG_SUA"));
+                authorities.add(new SimpleGrantedAuthority("QUAN_LY_NGUOI_DUNG_XOA"));
+            } else {
+                // Default permissions cho user thường
+                authorities.add(new SimpleGrantedAuthority("USER"));
+            }
+        }
+
+        return authorities;
     }
 }

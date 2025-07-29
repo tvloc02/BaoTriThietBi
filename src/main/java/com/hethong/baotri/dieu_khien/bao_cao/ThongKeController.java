@@ -48,3 +48,4 @@ public class ThongKeController {
         return ResponseEntity.ok(thongKe);
     }
 }
+

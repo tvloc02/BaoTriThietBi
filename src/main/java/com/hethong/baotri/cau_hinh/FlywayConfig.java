@@ -1,47 +1,21 @@
 package com.hethong.baotri.cau_hinh;
 
 import lombok.extern.slf4j.Slf4j;
-import org.flywaydb.core.Flyway;
-import org.springframework.boot.autoconfigure.flyway.FlywayMigrationInitializer;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 
-import javax.sql.DataSource;
-
 @Configuration
-@Profile("dev")
+@Profile("disabled") // Vô hiệu hóa Flyway config
+@ConditionalOnProperty(value = "spring.flyway.enabled", havingValue = "true")
 @Slf4j
 public class FlywayConfig {
 
-    @Bean
-    @DependsOn("dataSource")
-    public Flyway flyway(DataSource dataSource) {
-        log.info("🔄 Configuring Flyway for H2 database...");
+    // ✅ FLYWAY ĐÃ BỊ VÔ HIỆU HÓA
+    // Không sử dụng migration - dùng cơ sở dữ liệu có sẵn
 
-        Flyway flyway = Flyway.configure()
-                .dataSource(dataSource)
-                .locations("classpath:db/migration")
-                .baselineOnMigrate(true)
-                .validateOnMigrate(false)
-                .cleanDisabled(false)
-                .mixed(true)
-                .sqlMigrationSuffixes(".sql")
-                // ✅ H2 specific settings
-                .table("flyway_schema_history")
-                .baselineVersion("0")
-                .baselineDescription("Initial version")
-                .load();
-
-        log.info("✅ Flyway configured successfully");
-        return flyway;
-    }
-
-    @Bean
-    @DependsOn("flyway")
-    public FlywayMigrationInitializer flywayInitializer(Flyway flyway) {
-        log.info("🚀 Starting Flyway migration...");
-        return new FlywayMigrationInitializer(flyway);
+    public FlywayConfig() {
+        log.info("🚫 Flyway configuration đã bị vô hiệu hóa");
+        log.info("📊 Sử dụng cơ sở dữ liệu SQL Server có sẵn");
     }
 }
